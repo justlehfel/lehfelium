@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundRate Pro</title>
+    <title>Lehfilium</title>
     
     <!-- Tailwind CSS pour le design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -60,7 +58,7 @@
                 <i class="ph ph-vinyl-record text-3xl text-white"></i>
             </div>
             
-            <h1 class="text-3xl font-black text-center mb-2">SoundRate Pro</h1>
+            <h1 class="text-3xl font-black text-center mb-2">Lehfilium</h1>
             <p class="text-center text-gray-400 mb-8 font-light">L'archive musicale ultime.</p>
 
             <div class="space-y-4">
@@ -81,10 +79,10 @@
         <!-- Sidebar -->
         <nav class="w-20 md:w-64 glass-panel border-r border-white/10 flex flex-col items-center md:items-start py-8 transition-all duration-300">
             <div class="flex items-center gap-3 px-0 md:px-8 mb-12 cursor-pointer" onclick="switchView('home')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0">
                     <i class="ph-fill ph-vinyl-record text-white text-xl"></i>
                 </div>
-                <span class="text-xl font-black hidden md:block bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">SoundRate</span>
+                <span class="text-xl font-black hidden md:block bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Lehfilium</span>
             </div>
 
             <div class="flex-1 w-full px-4 space-y-2">
@@ -126,8 +124,9 @@
         
         // État de la recherche
         let currentSearchQuery = "";
-        let currentSearchFilter = "album"; // "album" ou "musicArtist"
+        let currentSearchFilter = "album"; // "album", "ep", "single", "artist"
 
+        // Système de notification Toast
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -143,12 +142,10 @@
             
             container.appendChild(toast);
 
-            // Animation d'entrée
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-x-full', 'opacity-0');
             });
 
-            // Disparition après 3 secondes
             setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
@@ -178,7 +175,6 @@
             if(type === 'signup') result = await supabaseClient.auth.signUp({ email, password });
 
             if(result.error) {
-                // Traduction des erreurs fréquentes
                 if(result.error.message.includes("Invalid login credentials")) showToast("Email ou mot de passe incorrect.", "error");
                 else if(result.error.message.includes("already registered")) showToast("Cet email est déjà utilisé.", "error");
                 else showToast(result.error.message, "error");
@@ -193,7 +189,7 @@
         async function logOut() {
             await supabaseClient.auth.signOut();
             currentUser = null;
-            showToast("À bientôt !", "success");
+            showToast("Déconnecté avec succès.", "success");
             checkSession();
         }
 
@@ -211,6 +207,8 @@
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = '';
 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
             if(viewName === 'home') renderHome(mainContent);
             if(viewName === 'search') renderSearch(mainContent);
             if(viewName === 'album') renderAlbumView(mainContent);
@@ -221,16 +219,16 @@
         function renderHome(container) {
             container.innerHTML = `
                 <div class="animate-fade-in">
-                    <div class="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12">
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple-900 via-pink-900 to-orange-900 animate-gradient opacity-80"></div>
+                    <div class="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-2xl">
+                        <div class="absolute inset-0 bg-gradient-to-r from-purple-900 via-pink-900 to-orange-900 opacity-80"></div>
                         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2070')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                         <div class="relative z-10 h-full flex flex-col justify-center p-8 md:p-12">
-                            <span class="px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium w-max mb-6">SoundRate V2</span>
+                            <span class="px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-bold tracking-widest uppercase w-max mb-6">Bienvenue sur Lehfilium</span>
                             <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight drop-shadow-xl">
-                                Explorez, Notez, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">Archivez.</span>
+                                Explorez, Notez, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">Archivez l'Histoire.</span>
                             </h1>
                             <button onclick="switchView('search')" class="mt-4 bg-white text-black px-8 py-3 rounded-xl font-bold w-max hover:scale-105 transition-transform flex items-center gap-2">
-                                <i class="ph-bold ph-magnifying-glass"></i> Chercher un album
+                                <i class="ph-bold ph-magnifying-glass"></i> Chercher une œuvre
                             </button>
                         </div>
                     </div>
@@ -247,17 +245,18 @@
                         <button type="submit" class="absolute right-3 top-3 bottom-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-8 font-bold transition-transform hover:scale-105">Chercher</button>
                     </form>
 
-                    <!-- Filtres -->
-                    <div class="flex justify-center gap-3 mb-10">
-                        <button id="filter-album" class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">Albums & EPs</button>
-                        <button id="filter-artist" class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'musicArtist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('musicArtist')">Artistes</button>
+                    <!-- Filtres stricts Lehfilium -->
+                    <div class="flex flex-wrap justify-center gap-3 mb-10">
+                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">FULL ALBUM</button>
+                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'ep' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('ep')">EP (4-6)</button>
+                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'single' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('single')">Single (1-3)</button>
+                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'artist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('artist')">Artiste</button>
                     </div>
 
                     <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
             `;
 
-            // Relancer la recherche si on revient sur la vue
             if(currentSearchQuery) executeSearch(currentSearchQuery);
 
             document.getElementById('search-form').addEventListener('submit', (e) => {
@@ -269,7 +268,7 @@
 
         window.setFilter = function(type) {
             currentSearchFilter = type;
-            switchView('search'); // Re-render pour MAJ l'UI des boutons
+            switchView('search'); 
         };
 
         async function executeSearch(query) {
@@ -278,8 +277,15 @@
             resultsContainer.innerHTML = `<div class="col-span-full text-center py-20"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="text-gray-400 mt-4">Fouille de la base de données mondiale...</p></div>`;
 
             try {
-                // L'API iTunes. On met une limite de 50 pour être sûr de trouver Toxicity au milieu des singles
-                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${currentSearchFilter}&limit=50`);
+                // Algorithme Intelligent Lehfilium : On récupère BEAUCOUP de résultats pour trouver les perles (limit=200)
+                let apiUrl = '';
+                if(currentSearchFilter === 'artist') {
+                    apiUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=50`;
+                } else {
+                    apiUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200`;
+                }
+
+                const res = await fetch(apiUrl);
                 const data = await res.json();
                 
                 resultsContainer.innerHTML = '';
@@ -289,10 +295,35 @@
                     return;
                 }
 
-                data.results.forEach(item => {
-                    if (currentSearchFilter === 'album') renderSearchAlbumCard(item, resultsContainer);
-                    else if (currentSearchFilter === 'musicArtist') renderSearchArtistCard(item, resultsContainer);
-                });
+                if (currentSearchFilter === 'artist') {
+                    data.results.forEach(item => renderSearchArtistCard(item, resultsContainer));
+                } else {
+                    // Filtrage et Tri Intelligent
+                    let filteredAlbums = data.results.filter(item => {
+                        // Supprimer les trucs parodiques/karaoke
+                        const artistLow = item.artistName.toLowerCase();
+                        if(artistLow.includes('karaoke') || artistLow.includes('tribute') || artistLow.includes('lullaby')) return false;
+
+                        // Appliquer le filtre strict de Lehfilium
+                        if(currentSearchFilter === 'album') return item.trackCount > 6;
+                        if(currentSearchFilter === 'ep') return item.trackCount >= 4 && item.trackCount <= 6;
+                        if(currentSearchFilter === 'single') return item.trackCount <= 3;
+                        return true;
+                    });
+
+                    // Tri : Priorité aux correspondances exactes du titre, puis au nombre de pistes (souvent signe de popularité/album officiel)
+                    filteredAlbums.sort((a, b) => {
+                        const aExact = a.collectionName.toLowerCase() === query.toLowerCase() ? 1 : 0;
+                        const bExact = b.collectionName.toLowerCase() === query.toLowerCase() ? 1 : 0;
+                        if (aExact !== bExact) return bExact - aExact;
+                        return b.trackCount - a.trackCount; // Plus de pistes en premier si égalité
+                    });
+
+                    // On n'affiche que les 30 meilleurs résultats pour ne pas faire lagger
+                    filteredAlbums.slice(0, 30).forEach(item => renderSearchAlbumCard(item, resultsContainer));
+                    
+                    if(filteredAlbums.length === 0) resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat exact dans cette catégorie. Essayez un autre filtre (ex: Single).</p>`;
+                }
             } catch(e) {
                 resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center">Erreur de connexion à l'API musicale.</p>`;
                 showToast("Erreur lors de la recherche.", "error");
@@ -300,9 +331,10 @@
         }
 
         function renderSearchAlbumCard(album, container) {
-            // Filtrer les trucs bizarres si on veut (Optionnel)
-            const isSingle = album.trackCount <= 3;
-            const badge = isSingle ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md text-xs font-bold px-2 py-1 rounded border border-white/10 z-20">EP/Single</span>` : '';
+            let badgeText = "ALBUM";
+            let badgeColor = "bg-purple-600";
+            if (album.trackCount <= 3) { badgeText = "SINGLE"; badgeColor = "bg-blue-600"; }
+            else if (album.trackCount <= 6) { badgeText = "EP"; badgeColor = "bg-pink-600"; }
 
             const highResImage = album.artworkUrl100.replace('100x100bb', '600x600bb');
             
@@ -310,11 +342,11 @@
             card.className = "group cursor-pointer animate-fade-in flex flex-col";
             card.innerHTML = `
                 <div class="aspect-square rounded-2xl overflow-hidden mb-3 border border-white/10 relative shadow-lg bg-white/5">
-                    ${badge}
+                    <span class="absolute top-2 left-2 ${badgeColor} text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20">${badgeText}</span>
                     <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" onerror="this.src='https://placehold.co/600x600/1a1a24/ffffff?text=No+Cover'">
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                        <div class="w-14 h-14 rounded-full bg-pink-500 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform">
-                            <i class="ph-fill ph-play text-white text-2xl ml-1"></i>
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform shadow-xl">
+                            <i class="ph-fill ph-play text-black text-2xl ml-1"></i>
                         </div>
                     </div>
                 </div>
@@ -334,9 +366,9 @@
         function renderSearchArtistCard(artist, container) {
             const card = document.createElement('div');
             card.className = "group cursor-pointer animate-fade-in text-center flex flex-col items-center";
-            // L'API iTunes ne donne pas d'image d'artiste facilement. On utilise un beau placeholder généré.
+            // L'image n'est pas dispo dans search artist, on met un placeholder stylé. La vraie image sera fetchée dans la vue Artiste !
             card.innerHTML = `
-                <div class="w-full aspect-square rounded-full overflow-hidden mb-4 border-4 border-white/5 relative shadow-lg bg-gradient-to-br from-gray-800 to-black flex items-center justify-center group-hover:border-pink-500/50 transition-colors">
+                <div class="w-full aspect-square rounded-full overflow-hidden mb-4 border-4 border-white/5 relative shadow-lg bg-gradient-to-br from-gray-800 to-[#0a0a0f] flex items-center justify-center group-hover:border-pink-500/50 transition-colors">
                     <i class="ph-fill ph-user text-6xl text-white/20 group-hover:scale-110 transition-transform duration-500"></i>
                 </div>
                 <h3 class="font-bold text-lg leading-tight mb-1 group-hover:text-pink-400 line-clamp-2">${artist.artistName}</h3>
@@ -352,53 +384,74 @@
         async function renderArtistView(container) {
             if(!currentArtistData) return switchView('search');
 
+            const spotifySearchLink = `https://open.spotify.com/search/${encodeURIComponent(currentArtistData.artistName)}`;
+
             container.innerHTML = `
                 <div class="animate-fade-in">
                     <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
-                        <i class="ph ph-arrow-left text-xl"></i> Retour
+                        <i class="ph ph-arrow-left text-xl"></i> Retour à la recherche
                     </button>
 
-                    <div class="relative rounded-3xl overflow-hidden mb-12 p-8 md:p-16 border border-white/10 bg-gradient-to-br from-gray-900 to-black flex flex-col items-center text-center shadow-2xl">
-                        <div class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border-4 border-white/10 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
-                             <i class="ph-fill ph-microphone-stage text-6xl md:text-8xl text-gray-600"></i>
+                    <!-- HEADER ARTISTE AVEC GÉNÉRATION D'IMAGE -->
+                    <div class="relative rounded-3xl overflow-hidden mb-12 border border-white/10 bg-black shadow-2xl">
+                        <!-- L'image de fond floutée sera injectée ici -->
+                        <div id="artist-banner-bg" class="absolute inset-0 z-0">
+                            <div class="w-full h-full bg-gradient-to-br from-gray-900 to-black"></div>
                         </div>
-                        <h1 class="text-4xl md:text-7xl font-black mb-4 drop-shadow-lg">${currentArtistData.artistName}</h1>
-                        <p class="text-pink-500 font-bold tracking-widest uppercase mb-6">${currentArtistData.primaryGenreName || 'Musique'}</p>
-                        <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-[#1DB954]/20 text-[#1DB954] hover:bg-[#1DB954] hover:text-black border border-[#1DB954]/50 px-6 py-2 rounded-full font-bold transition-all flex items-center gap-2">
-                            <i class="ph-fill ph-apple-logo text-xl"></i> Écouter sur Apple Music
-                        </a>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-0"></div>
+                        
+                        <div class="relative z-10 p-8 md:p-16 flex flex-col items-center text-center">
+                            <!-- La photo de profil de l'artiste sera injectée ici -->
+                            <div id="artist-pfp" class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border-4 border-white/10 overflow-hidden flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                                 <i class="ph-fill ph-microphone-stage text-6xl md:text-8xl text-gray-600"></i>
+                            </div>
+                            
+                            <h1 class="text-5xl md:text-7xl font-black mb-4 drop-shadow-lg">${currentArtistData.artistName}</h1>
+                            <p class="text-pink-500 font-bold tracking-widest uppercase mb-8">${currentArtistData.primaryGenreName || 'Musique'}</p>
+                            
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-[#fa243c]/20 text-[#fa243c] hover:bg-[#fa243c] hover:text-white border border-[#fa243c]/50 px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2">
+                                    <i class="ph-fill ph-apple-logo text-xl"></i> Apple Music
+                                </a>
+                                <a href="${spotifySearchLink}" target="_blank" class="bg-[#1DB954]/20 text-[#1DB954] hover:bg-[#1DB954] hover:text-black border border-[#1DB954]/50 px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2">
+                                    <i class="ph-fill ph-spotify-logo text-xl"></i> Spotify
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-white/10 pb-4"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-white/10 pb-4"><i class="ph-fill ph-disc text-purple-500"></i> Discographie Complète</h2>
                     <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6">
-                        <div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+                        <div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i><p class="mt-2 text-gray-400">Analyse de la discographie...</p></div>
                     </div>
                 </div>
             `;
 
-            // Récupérer les albums de l'artiste
             try {
+                // Fetch de la discographie
                 const res = await fetch(`https://itunes.apple.com/lookup?id=${currentArtistData.artistId}&entity=album&limit=200`);
                 const data = await res.json();
                 
                 const albumsContainer = document.getElementById('artist-albums-container');
                 albumsContainer.innerHTML = '';
 
-                // results[0] est l'artiste, les suivants sont les albums
                 const albums = data.results.filter(item => item.wrapperType === 'collection');
-                
-                // Trier par date (plus récent en premier)
-                albums.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+                albums.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)); // Plus récent en premier
 
-                if(albums.length === 0) albumsContainer.innerHTML = `<p class="text-gray-400 col-span-full">Aucun album trouvé.</p>`;
-
-                albums.forEach(album => renderSearchAlbumCard(album, albumsContainer));
-
+                if(albums.length === 0) {
+                    albumsContainer.innerHTML = `<p class="text-gray-400 col-span-full">Aucun album trouvé.</p>`;
+                } else {
+                    albums.forEach(album => renderSearchAlbumCard(album, albumsContainer));
+                    
+                    // ALGORITHME LEHFILIUM : Prendre l'image du dernier album pour faire la photo de profil de l'artiste !
+                    const topAlbumImage = albums[0].artworkUrl100.replace('100x100bb', '600x600bb');
+                    document.getElementById('artist-pfp').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover">`;
+                    document.getElementById('artist-banner-bg').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover blur-[100px] opacity-50 scale-110">`;
+                }
             } catch (e) {
                 document.getElementById('artist-albums-container').innerHTML = `<p class="text-red-500 col-span-full">Erreur de chargement de la discographie.</p>`;
             }
         }
-
 
         async function renderAlbumView(container) {
             if(!currentAlbumData) return switchView('search');
@@ -406,6 +459,13 @@
             const releaseYear = new Date(currentAlbumData.releaseDate).getFullYear();
             const fullDate = new Date(currentAlbumData.releaseDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
             
+            // Génération de liens intelligents
+            const spotifyAlbumLink = `https://open.spotify.com/search/${encodeURIComponent(currentAlbumData.artistName + ' ' + currentAlbumData.collectionName)}`;
+            
+            let badgeText = "FULL ALBUM";
+            if (currentAlbumData.trackCount <= 3) badgeText = "SINGLE";
+            else if (currentAlbumData.trackCount <= 6) badgeText = "EP";
+
             container.innerHTML = `
                 <div class="animate-fade-in">
                     <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
@@ -422,20 +482,26 @@
                         
                         <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-end">
                             <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-72 md:h-72 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/20 z-20 object-cover">
+                            
                             <div class="flex-1 w-full z-20">
-                                <div class="inline-block bg-white/10 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest text-pink-300 border border-white/10 mb-4">
-                                    ${currentAlbumData.primaryGenreName} • ${currentAlbumData.trackCount} Titres
+                                <!-- Métadonnées Lehfilium -->
+                                <div class="flex flex-wrap items-center gap-3 mb-4">
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest text-white border border-white/10">${badgeText}</span>
+                                    <span class="bg-pink-500/20 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest text-pink-300 border border-pink-500/30">${currentAlbumData.primaryGenreName}</span>
+                                    <span class="text-gray-400 text-sm font-medium"><i class="ph-fill ph-music-notes"></i> ${currentAlbumData.trackCount} Titres</span>
                                 </div>
+                                
                                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-3 leading-tight drop-shadow-xl text-balance">${currentAlbumData.collectionName}</h1>
                                 
                                 <!-- Lien vers l'artiste interactif -->
-                                <p class="text-xl md:text-2xl text-gray-300 font-medium mb-6 flex items-center gap-2 cursor-pointer hover:text-white transition-colors w-max" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
-                                    <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-orange-400 flex items-center justify-center shadow-lg"><i class="ph-fill ph-user text-white text-sm"></i></span>
+                                <p class="text-xl md:text-2xl text-gray-300 font-medium mb-6 flex items-center gap-2 cursor-pointer hover:text-white transition-colors w-max group" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
+                                    <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"><i class="ph-fill ph-user text-white text-sm"></i></span>
                                     ${currentAlbumData.artistName}
                                 </p>
                                 
-                                <p class="text-sm text-gray-400 mb-8 max-w-xl line-clamp-2" title="${currentAlbumData.copyright}">${currentAlbumData.copyright || `Sorti le ${fullDate}`}</p>
+                                <p class="text-sm text-gray-400 mb-8 max-w-xl line-clamp-2" title="${currentAlbumData.copyright}">Paru le ${fullDate} <br> <span class="opacity-50">${currentAlbumData.copyright || ''}</span></p>
                                 
+                                <!-- Contrôles et Liens -->
                                 <div class="glass-panel rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 border-white/5">
                                     <div class="flex items-center gap-6">
                                         <div>
@@ -447,13 +513,16 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="flex gap-3 w-full lg:w-auto">
-                                        <button onclick="saveRatingsToDB()" class="w-full lg:w-auto bg-white text-black hover:bg-gray-200 px-8 py-4 rounded-2xl font-black transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                                            <i class="ph-bold ph-floppy-disk text-xl"></i> Enregistrer
+                                    <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                                        <button onclick="saveRatingsToDB()" class="w-full lg:w-auto bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-2xl font-black transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                            <i class="ph-bold ph-floppy-disk text-xl"></i> Sauver
                                         </button>
-                                        <button onclick="shareAlbum()" class="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-colors border border-white/10 flex items-center justify-center">
-                                            <i class="ph-bold ph-share-network text-xl text-white"></i>
-                                        </button>
+                                        <a href="${currentAlbumData.collectionViewUrl}" target="_blank" class="bg-[#fa243c]/10 hover:bg-[#fa243c]/30 text-[#fa243c] p-3 rounded-2xl transition-colors border border-[#fa243c]/20 flex items-center justify-center" title="Écouter sur Apple Music">
+                                            <i class="ph-fill ph-apple-logo text-2xl"></i>
+                                        </a>
+                                        <a href="${spotifyAlbumLink}" target="_blank" class="bg-[#1DB954]/10 hover:bg-[#1DB954]/30 text-[#1DB954] p-3 rounded-2xl transition-colors border border-[#1DB954]/20 flex items-center justify-center" title="Rechercher sur Spotify">
+                                            <i class="ph-fill ph-spotify-logo text-2xl"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -467,7 +536,6 @@
                 </div>
             `;
 
-            // Récupérer les chansons
             try {
                 const res = await fetch(`https://itunes.apple.com/lookup?id=${currentAlbumData.collectionId}&entity=song`);
                 const data = await res.json();
@@ -480,21 +548,16 @@
             }
         }
 
-        // Helper pour le lien vers l'artiste
         async function searchAndGoToArtist(artistName) {
-            showToast("Recherche de l'artiste...", "success");
+            showToast("Recherche du profil artiste...", "success");
             const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=musicArtist&limit=1`);
             const data = await res.json();
             if(data.results.length > 0) {
                 currentArtistData = data.results[0];
                 switchView('artist');
             } else {
-                showToast("Artiste non trouvé dans la base de données API.", "error");
+                showToast("Artiste introuvable.", "error");
             }
-        }
-
-        function shareAlbum() {
-            showToast("Lien copié dans le presse-papier ! (Simulation)", "success");
         }
 
         async function loadExistingRatings() {
@@ -513,7 +576,7 @@
 
         function renderTracks() {
             const container = document.getElementById('tracklist-container');
-            container.innerHTML = '<h2 class="text-2xl font-bold mb-6 mt-4 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes</h2>';
+            container.innerHTML = '<h2 class="text-2xl font-bold mb-6 mt-4 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Notation des pistes</h2>';
 
             currentTracksData.forEach(track => {
                 const minutes = Math.floor(track.trackTimeMillis / 60000);
@@ -521,6 +584,7 @@
                 const timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
                 
                 const existingData = trackRatingsState[track.trackId] || { score: '', note: '' };
+                const explicitBadge = track.trackExplicitness === 'explicit' ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-bold text-red-400 border border-red-500/30" title="Explicite">E</span>' : '';
 
                 const trackDiv = document.createElement('div');
                 trackDiv.className = "glass-panel p-4 md:p-5 rounded-2xl flex flex-col lg:flex-row gap-4 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:border-l-white/30 transition-all group";
@@ -531,7 +595,7 @@
                             <h3 class="font-bold text-base md:text-lg leading-tight text-white group-hover:text-pink-300 transition-colors line-clamp-2">${track.trackName}</h3>
                             <div class="flex items-center gap-3 mt-1">
                                 <p class="text-xs text-gray-500 flex items-center gap-1 font-medium"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
-                                ${track.trackExplicitness === 'explicit' ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-bold text-gray-400">E</span>' : ''}
+                                ${explicitBadge}
                             </div>
                         </div>
                     </div>
@@ -541,7 +605,7 @@
                             <i class="ph-fill ph-quotes absolute left-3 top-3 text-gray-600"></i>
                             <textarea 
                                 id="note-${track.trackId}"
-                                placeholder="Votre critique de cette piste..."
+                                placeholder="Votre critique (arrangements, paroles...)"
                                 class="w-full bg-black/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-gray-200 focus:border-purple-500 focus:bg-black resize-none h-12 transition-all hover:border-white/20"
                                 onchange="updateTrackState(${track.trackId}, 'note', this.value)"
                             >${existingData.note}</textarea>
@@ -585,7 +649,6 @@
             const display = document.getElementById('global-score-display');
             display.innerText = avg;
             
-            // Couleurs conditionnelles pour le design
             display.classList.remove('text-green-400', 'text-yellow-400', 'text-red-400', 'text-white');
             if (avg === 0) display.classList.add('text-white');
             else if (avg >= 8) display.classList.add('text-green-400');
@@ -609,7 +672,6 @@
                 track_ratings: trackRatingsState
             };
 
-            // 1. Vérifier si l'album existe
             const { data: existing, error: checkError } = await supabaseClient
                 .from('album_ratings')
                 .select('id')
@@ -620,7 +682,7 @@
 
             let error;
             if (existing && existing.length > 0) {
-                // UPDATE (Règle le bug des doublons)
+                // UPDATE pour éviter les doublons
                 const res = await supabaseClient.from('album_ratings').update(payload).eq('id', existing[0].id);
                 error = res.error;
             } else {
@@ -631,9 +693,9 @@
 
             if (error) {
                 console.error(error);
-                showToast("Erreur BD. Vérifiez vos règles RLS dans Supabase.", "error");
+                showToast("Erreur BD. Vérifiez que la RLS est bien configurée.", "error");
             } else {
-                showToast("Sauvegarde réussie dans votre journal !", "success");
+                showToast("Sauvegarde Lehfilium réussie !", "success");
             }
         };
 
@@ -655,9 +717,9 @@
                 albumsHTML = `
                     <div class="col-span-full text-center py-20 glass-panel rounded-[2rem] border-dashed border-2 border-white/10">
                         <i class="ph-fill ph-folder-open text-6xl text-gray-600 mb-4"></i>
-                        <h3 class="text-2xl font-bold mb-2">Votre journal est vide</h3>
-                        <p class="text-gray-400 mb-6">Commencez à noter des albums pour construire votre identité musicale.</p>
-                        <button onclick="switchView('search')" class="bg-white text-black px-6 py-3 rounded-full font-bold">Explorer la musique</button>
+                        <h3 class="text-2xl font-bold mb-2">Votre journal Lehfilium est vide</h3>
+                        <p class="text-gray-400 mb-6">Commencez à noter des œuvres pour construire votre identité.</p>
+                        <button onclick="switchView('search')" class="bg-white text-black px-6 py-3 rounded-full font-bold">Explorer</button>
                     </div>
                 `;
             } else {
@@ -685,7 +747,9 @@
             container.innerHTML = `
                 <div class="animate-fade-in max-w-6xl mx-auto">
                     <!-- HEADER PROFIL -->
-                    <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl">
+                    <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl border-white/10">
+                        <div class="absolute right-0 top-0 w-64 h-64 bg-pink-500/10 blur-[80px] rounded-full"></div>
+                        
                         <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(236,72,153,0.3)]">
                             <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-4 border-[#0a0a0f]">
                                 <i class="ph-fill ph-user text-6xl text-white/50"></i>
@@ -693,6 +757,7 @@
                         </div>
                         
                         <div class="flex-1 text-center md:text-left z-10">
+                            <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-bold tracking-widest uppercase mb-3 inline-block">Membre Lehfilium</span>
                             <h1 class="text-4xl font-black mb-2">${currentUser.email.split('@')[0]}</h1>
                             <p class="text-gray-400 font-medium mb-8 flex items-center justify-center md:justify-start gap-2">
                                 <i class="ph-fill ph-envelope-simple text-gray-500"></i> ${currentUser.email}
@@ -701,17 +766,13 @@
                             <div class="flex flex-wrap justify-center md:justify-start gap-4">
                                 <div class="bg-black/40 border border-white/10 px-8 py-4 rounded-2xl text-center">
                                     <span class="block text-3xl font-black text-pink-400 mb-1">${ratings.length}</span>
-                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Albums Notés</span>
-                                </div>
-                                <div class="bg-black/40 border border-white/10 px-8 py-4 rounded-2xl text-center">
-                                    <span class="block text-3xl font-black text-purple-400 mb-1">0</span>
-                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Abonnés</span>
+                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Œuvres Notées</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-vinyl-record text-pink-500 text-3xl"></i> Le Journal</h2>
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-books text-purple-500 text-3xl"></i> Archive Personnelle</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         ${albumsHTML}
                     </div>
