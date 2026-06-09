@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundRate - Minimal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Animations douces */
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #111; }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        input:focus, textarea:focus { outline: none; border-color: #111; box-shadow: 0 0 0 1px #111; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="auth-section" class="fade-in bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center">Rejoindre SoundRate</h1>
+        <input id="email" type="email" placeholder="Adresse Email" class="w-full mb-4 p-3 rounded-xl border border-gray-200 transition-all">
+        <input id="password" type="password" placeholder="Mot de passe" class="w-full mb-6 p-3 rounded-xl border border-gray-200 transition-all">
+        <button onclick="signUp()" class="w-full bg-black text-white p-3 rounded-xl font-medium hover:bg-gray-800 transition-all mb-2">Créer un compte</button>
+        <button onclick="signIn()" class="w-full bg-white text-black border border-gray-200 p-3 rounded-xl font-medium hover:bg-gray-50 transition-all">Se connecter</button>
+    </div>
+
+    <div id="app-section" class="fade-in bg-white p-6 md:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-2xl hidden">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+            <h1 class="text-xl font-bold tracking-tight">Daft Punk - RAM</h1>
+            <button onclick="signOut()" class="text-sm text-gray-500 hover:text-black">Déconnexion</button>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group">
+            <div class="w-full">
+                <p class="font-medium text-lg">1. Giorgio by Moroder</p>
+                <input id="song-note" type="text" placeholder="Ajouter une note visuelle (ex: Production incroyable...)" class="w-full mt-2 p-2 text-sm text-gray-600 bg-gray-50 rounded-lg border border-transparent focus:border-gray-300 transition-all">
+            </div>
+            <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-xl">
+                <input id="song-rating" type="number" min="0" max="10" step="0.1" value="0.0" class="w-16 p-2 rounded-lg border border-gray-200 text-center font-bold text-lg bg-white">
+                <span class="text-gray-400 font-medium mr-2">/ 10</span>
+                <button onclick="saveRating()" class="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:scale-105 transition-transform">Sauver</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clés Supabase mises à jour
+        const SUPABASE_URL = 'https://ydzgypqykkwqqnqttaaj.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlkemd5cHF5a2t3cXFucXR0YWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NjM3NzcsImV4cCI6MjA5NjUzOTc3N30.ax7ZOCH9TffTXBwaR2Jd4gPH8c2rq5Do__gxsjylXOA';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Gestion de l'interface
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+
+        // Vérifier si l'utilisateur est déjà connecté
+        async function checkUser() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+            }
+        }
+        checkUser();
+
+        // Inscription
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert("Compte créé ! Vérifiez vos emails (si activé) ou connectez-vous.");
+        }
+
+        // Connexion
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else checkUser();
+        }
+
+        // Déconnexion
+        async function signOut() {
+            await supabase.auth.signOut();
+            appSection.classList.add('hidden');
+            authSection.classList.remove('hidden');
+        }
+
+        // Sauvegarder la note dans la base de données
+        async function saveRating() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return alert("Veuillez vous connecter");
+
+            const rating = parseFloat(document.getElementById('song-rating').value);
+            const note = document.getElementById('song-note').value;
+
+            const { data, error } = await supabase.from('ratings').insert([
+                { user_id: user.id, song_title: 'Giorgio by Moroder', rating: rating, review_note: note }
+            ]);
+
+            if (error) alert("Erreur: " + error.message);
+            else alert("Note enregistrée avec succès dans la base de données !");
+        }
+    </script>
+</body>
+</html>
