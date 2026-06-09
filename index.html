@@ -11,37 +11,26 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Phosphor Icons (Icônes ultra modernes) -->
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
         
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0f;
-            color: #ffffff;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0f; color: #ffffff; overflow-x: hidden; }
 
-        /* Animations */
-        @keyframes gradient-xy {
-            0%, 100% { background-position: 0% 0%; }
-            50% { background-position: 100% 100%; }
-        }
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(2deg); }
         }
         .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Design Verre dépoli (Glassmorphism) */
         .glass-panel {
             background: rgba(20, 20, 25, 0.6);
             backdrop-filter: blur(16px);
@@ -49,7 +38,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Cacher la barre de défilement */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -63,6 +51,9 @@
         <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/20 blur-[150px] animate-float" style="animation-delay: -3s;"></div>
     </div>
 
+    <!-- Conteneur pour les notifications popups animées -->
+    <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3"></div>
+
     <div id="auth-screen" class="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div class="glass-panel p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl animate-fade-in border-t border-l border-white/20">
             <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(236,72,153,0.4)]">
@@ -70,14 +61,14 @@
             </div>
             
             <h1 class="text-3xl font-black text-center mb-2">SoundRate Pro</h1>
-            <p class="text-center text-gray-400 mb-8 font-light">Rejoignez la révolution musicale.</p>
+            <p class="text-center text-gray-400 mb-8 font-light">L'archive musicale ultime.</p>
 
             <div class="space-y-4">
                 <input id="auth-email" type="email" placeholder="Email audiophile" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:border-pink-500 transition-all">
                 <input id="auth-password" type="password" placeholder="Mot de passe secret" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:border-purple-500 transition-all">
                 
-                <button onclick="handleAuth('login')" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-2xl px-5 py-4 mt-4 transition-transform hover:scale-[1.02] shadow-lg">
-                    Se connecter
+                <button onclick="handleAuth('login')" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-2xl px-5 py-4 mt-4 transition-transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-sign-in"></i> Se connecter
                 </button>
                 <button onclick="handleAuth('signup')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-2xl px-5 py-4 transition-all">
                     Créer mon compte
@@ -87,10 +78,9 @@
     </div>
 
     <div id="app-screen" class="relative z-10 hidden flex h-screen">
-        
         <!-- Sidebar -->
         <nav class="w-20 md:w-64 glass-panel border-r border-white/10 flex flex-col items-center md:items-start py-8 transition-all duration-300">
-            <div class="flex items-center gap-3 px-0 md:px-8 mb-12">
+            <div class="flex items-center gap-3 px-0 md:px-8 mb-12 cursor-pointer" onclick="switchView('home')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
                     <i class="ph-fill ph-vinyl-record text-white text-xl"></i>
                 </div>
@@ -102,10 +92,10 @@
                     <i class="ph ph-house text-2xl"></i> <span class="font-medium hidden md:block">Découverte</span>
                 </button>
                 <button onclick="switchView('search')" id="nav-search" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-magnifying-glass text-2xl"></i> <span class="font-medium hidden md:block">Rechercher</span>
+                    <i class="ph ph-magnifying-glass text-2xl"></i> <span class="font-medium hidden md:block">Recherche Globale</span>
                 </button>
                 <button onclick="switchView('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-user text-2xl"></i> <span class="font-medium hidden md:block">Mon Profil</span>
+                    <i class="ph ph-user text-2xl"></i> <span class="font-medium hidden md:block">Mon Journal</span>
                 </button>
             </div>
 
@@ -116,26 +106,55 @@
             </div>
         </nav>
 
-        <!-- Contenu Dynamique -->
         <main class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-10" id="main-content">
             <!-- Vues injectées en JavaScript ici -->
         </main>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION SUPABASE ---
         const { createClient } = window.supabase;
         const SUPABASE_URL = 'https://ydzgypqykkwqqnqttaaj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlkemd5cHF5a2t3cXFucXR0YWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NjM3NzcsImV4cCI6MjA5NjUzOTc3N30.ax7ZOCH9TffTXBwaR2Jd4gPH8c2rq5Do__gxsjylXOA';
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Variables Globales
+        // Variables Globales de l'Application
         let currentUser = null;
         let currentAlbumData = null;
+        let currentArtistData = null;
         let currentTracksData = [];
-        let trackRatingsState = {}; // Stocke les notes actuelles : { trackId: { score: 8.5, note: '' } }
+        let trackRatingsState = {};
+        
+        // État de la recherche
+        let currentSearchQuery = "";
+        let currentSearchFilter = "album"; // "album" ou "musicArtist"
 
-        // --- 2. GESTION DE L'AUTHENTIFICATION ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const isError = type === 'error';
+            const bgColor = isError ? 'bg-red-500/20' : 'bg-green-500/20';
+            const borderColor = isError ? 'border-red-500/50' : 'border-green-500/50';
+            const iconColor = isError ? 'text-red-400' : 'text-green-400';
+            const icon = isError ? 'ph-warning-circle' : 'ph-check-circle';
+
+            toast.className = `glass-panel ${bgColor} border ${borderColor} px-6 py-4 rounded-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 shadow-2xl`;
+            toast.innerHTML = `<i class="ph-fill ${icon} ${iconColor} text-2xl"></i><span class="font-medium text-white">${message}</span>`;
+            
+            container.appendChild(toast);
+
+            // Animation d'entrée
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            });
+
+            // Disparition après 3 secondes
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         async function checkSession() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (user) {
@@ -152,26 +171,33 @@
         async function handleAuth(type) {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            if(!email || !password) return alert("Remplissez tous les champs.");
+            if(!email || !password) return showToast("Veuillez remplir tous les champs.", "error");
 
             let result;
             if(type === 'login') result = await supabaseClient.auth.signInWithPassword({ email, password });
             if(type === 'signup') result = await supabaseClient.auth.signUp({ email, password });
 
-            if(result.error) alert(result.error.message);
-            else if (type === 'signup') alert("Compte créé ! Connectez-vous maintenant.");
-            else checkSession();
+            if(result.error) {
+                // Traduction des erreurs fréquentes
+                if(result.error.message.includes("Invalid login credentials")) showToast("Email ou mot de passe incorrect.", "error");
+                else if(result.error.message.includes("already registered")) showToast("Cet email est déjà utilisé.", "error");
+                else showToast(result.error.message, "error");
+            }
+            else if (type === 'signup') showToast("Compte créé avec succès ! Vous pouvez vous connecter.", "success");
+            else {
+                showToast("Connexion réussie !", "success");
+                checkSession();
+            }
         }
 
         async function logOut() {
             await supabaseClient.auth.signOut();
             currentUser = null;
+            showToast("À bientôt !", "success");
             checkSession();
         }
 
-        // --- 3. GESTION DES VUES (ROUTING VANILLA JS) ---
         function switchView(viewName) {
-            // Mettre à jour l'UI des boutons
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-white/10', 'text-white');
                 btn.classList.add('text-gray-500');
@@ -183,30 +209,28 @@
             }
 
             const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = ''; // Nettoyer l'écran
+            mainContent.innerHTML = '';
 
             if(viewName === 'home') renderHome(mainContent);
             if(viewName === 'search') renderSearch(mainContent);
             if(viewName === 'album') renderAlbumView(mainContent);
+            if(viewName === 'artist') renderArtistView(mainContent);
             if(viewName === 'profile') renderProfile(mainContent);
         }
 
-        // --- STREAMING_CHUNK: VUE HOME ---
         function renderHome(container) {
             container.innerHTML = `
                 <div class="animate-fade-in">
-                    <div class="relative w-full h-[400px] rounded-3xl overflow-hidden mb-12">
+                    <div class="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12">
                         <div class="absolute inset-0 bg-gradient-to-r from-purple-900 via-pink-900 to-orange-900 animate-gradient opacity-80"></div>
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2070')] bg-cover bg-center mix-blend-overlay opacity-30"></div>
                         <div class="relative z-10 h-full flex flex-col justify-center p-8 md:p-12">
-                            <span class="px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium w-max mb-6">SoundRate Pro v2</span>
-                            <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight">
-                                Notez chaque <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">vibration.</span>
+                            <span class="px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium w-max mb-6">SoundRate V2</span>
+                            <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight drop-shadow-xl">
+                                Explorez, Notez, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">Archivez.</span>
                             </h1>
-                            <p class="text-lg md:text-xl text-gray-300 max-w-2xl">
-                                Bienvenue sur la plateforme sociale ultime pour les audiophiles. Recherchez n'importe quel album, notez chaque piste au dixième près.
-                            </p>
-                            <button onclick="switchView('search')" class="mt-8 bg-white text-black px-8 py-3 rounded-xl font-bold w-max hover:scale-105 transition-transform">
-                                Commencer à explorer
+                            <button onclick="switchView('search')" class="mt-4 bg-white text-black px-8 py-3 rounded-xl font-bold w-max hover:scale-105 transition-transform flex items-center gap-2">
+                                <i class="ph-bold ph-magnifying-glass"></i> Chercher un album
                             </button>
                         </div>
                     </div>
@@ -214,135 +238,267 @@
             `;
         }
 
-        // --- STREAMING_CHUNK: VUE RECHERCHE (API APPLE MUSIC) ---
         function renderSearch(container) {
             container.innerHTML = `
                 <div class="animate-fade-in">
-                    <form id="search-form" class="relative mb-10 max-w-3xl mx-auto">
+                    <form id="search-form" class="relative mb-6 max-w-4xl mx-auto">
                         <i class="ph ph-magnifying-glass absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <input id="search-input" type="text" placeholder="Rechercher un album, un artiste..." class="w-full bg-white/5 border border-white/10 rounded-full py-5 pl-16 pr-6 text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
-                        <button type="submit" class="absolute right-3 top-3 bottom-3 bg-pink-600 hover:bg-pink-500 text-white rounded-full px-8 font-medium transition-colors">Chercher</button>
+                        <input id="search-input" type="text" value="${currentSearchQuery}" placeholder="Rechercher Toxicity, Daft Punk, etc..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-32 text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
+                        <button type="submit" class="absolute right-3 top-3 bottom-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-8 font-bold transition-transform hover:scale-105">Chercher</button>
                     </form>
+
+                    <!-- Filtres -->
+                    <div class="flex justify-center gap-3 mb-10">
+                        <button id="filter-album" class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">Albums & EPs</button>
+                        <button id="filter-artist" class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'musicArtist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('musicArtist')">Artistes</button>
+                    </div>
+
                     <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
             `;
 
-            document.getElementById('search-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const query = document.getElementById('search-input').value;
-                if(!query) return;
-                
-                const resultsContainer = document.getElementById('search-results');
-                resultsContainer.innerHTML = `<div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>`;
+            // Relancer la recherche si on revient sur la vue
+            if(currentSearchQuery) executeSearch(currentSearchQuery);
 
-                try {
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=24`);
-                    const data = await res.json();
-                    
-                    resultsContainer.innerHTML = '';
-                    data.results.forEach(album => {
-                        const highResImage = album.artworkUrl100.replace('100x100bb', '600x600bb'); // Magie pour la HD
-                        
-                        // Création de la carte d'album
-                        const card = document.createElement('div');
-                        card.className = "group cursor-pointer animate-fade-in";
-                        card.innerHTML = `
-                            <div class="aspect-square rounded-2xl overflow-hidden mb-3 border border-white/10 relative shadow-lg">
-                                <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
-                                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center">
-                                        <i class="ph-fill ph-play text-white text-xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <h3 class="font-bold text-sm md:text-base leading-tight mb-1 group-hover:text-pink-400 line-clamp-1">${album.collectionName}</h3>
-                            <p class="text-gray-400 text-xs md:text-sm truncate">${album.artistName}</p>
-                        `;
-                        
-                        // Action au clic
-                        card.onclick = () => {
-                            album.artworkUrl100 = highResImage; // Sauver la HD
-                            currentAlbumData = album;
-                            switchView('album');
-                        };
-                        
-                        resultsContainer.appendChild(card);
-                    });
-                } catch(e) {
-                    resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center">Erreur de recherche.</p>`;
-                }
+            document.getElementById('search-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                currentSearchQuery = document.getElementById('search-input').value;
+                executeSearch(currentSearchQuery);
             });
         }
 
-        // --- STREAMING_CHUNK: VUE ALBUM & NOTATION ---
-        async function renderAlbumView(container) {
-            if(!currentAlbumData) return switchView('search');
+        window.setFilter = function(type) {
+            currentSearchFilter = type;
+            switchView('search'); // Re-render pour MAJ l'UI des boutons
+        };
+
+        async function executeSearch(query) {
+            if(!query) return;
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = `<div class="col-span-full text-center py-20"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="text-gray-400 mt-4">Fouille de la base de données mondiale...</p></div>`;
+
+            try {
+                // L'API iTunes. On met une limite de 50 pour être sûr de trouver Toxicity au milieu des singles
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${currentSearchFilter}&limit=50`);
+                const data = await res.json();
+                
+                resultsContainer.innerHTML = '';
+                
+                if(data.results.length === 0) {
+                    resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat trouvé pour "${query}".</p>`;
+                    return;
+                }
+
+                data.results.forEach(item => {
+                    if (currentSearchFilter === 'album') renderSearchAlbumCard(item, resultsContainer);
+                    else if (currentSearchFilter === 'musicArtist') renderSearchArtistCard(item, resultsContainer);
+                });
+            } catch(e) {
+                resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center">Erreur de connexion à l'API musicale.</p>`;
+                showToast("Erreur lors de la recherche.", "error");
+            }
+        }
+
+        function renderSearchAlbumCard(album, container) {
+            // Filtrer les trucs bizarres si on veut (Optionnel)
+            const isSingle = album.trackCount <= 3;
+            const badge = isSingle ? `<span class="absolute top-2 right-2 bg-black/80 backdrop-blur-md text-xs font-bold px-2 py-1 rounded border border-white/10 z-20">EP/Single</span>` : '';
+
+            const highResImage = album.artworkUrl100.replace('100x100bb', '600x600bb');
             
-            // Structure de base de la page
+            const card = document.createElement('div');
+            card.className = "group cursor-pointer animate-fade-in flex flex-col";
+            card.innerHTML = `
+                <div class="aspect-square rounded-2xl overflow-hidden mb-3 border border-white/10 relative shadow-lg bg-white/5">
+                    ${badge}
+                    <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" onerror="this.src='https://placehold.co/600x600/1a1a24/ffffff?text=No+Cover'">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                        <div class="w-14 h-14 rounded-full bg-pink-500 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform">
+                            <i class="ph-fill ph-play text-white text-2xl ml-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="font-bold text-base leading-tight mb-1 group-hover:text-pink-400 line-clamp-2">${album.collectionName}</h3>
+                <p class="text-gray-400 text-sm truncate hover:text-white transition-colors">${album.artistName}</p>
+                <p class="text-xs text-gray-600 font-medium mt-auto pt-1">${album.primaryGenreName} • ${new Date(album.releaseDate).getFullYear()}</p>
+            `;
+            
+            card.onclick = () => {
+                album.artworkUrl100 = highResImage;
+                currentAlbumData = album;
+                switchView('album');
+            };
+            container.appendChild(card);
+        }
+
+        function renderSearchArtistCard(artist, container) {
+            const card = document.createElement('div');
+            card.className = "group cursor-pointer animate-fade-in text-center flex flex-col items-center";
+            // L'API iTunes ne donne pas d'image d'artiste facilement. On utilise un beau placeholder généré.
+            card.innerHTML = `
+                <div class="w-full aspect-square rounded-full overflow-hidden mb-4 border-4 border-white/5 relative shadow-lg bg-gradient-to-br from-gray-800 to-black flex items-center justify-center group-hover:border-pink-500/50 transition-colors">
+                    <i class="ph-fill ph-user text-6xl text-white/20 group-hover:scale-110 transition-transform duration-500"></i>
+                </div>
+                <h3 class="font-bold text-lg leading-tight mb-1 group-hover:text-pink-400 line-clamp-2">${artist.artistName}</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">${artist.primaryGenreName || 'Artiste'}</p>
+            `;
+            card.onclick = () => {
+                currentArtistData = artist;
+                switchView('artist');
+            };
+            container.appendChild(card);
+        }
+
+        async function renderArtistView(container) {
+            if(!currentArtistData) return switchView('search');
+
             container.innerHTML = `
                 <div class="animate-fade-in">
                     <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
                         <i class="ph ph-arrow-left text-xl"></i> Retour
                     </button>
 
-                    <!-- HEADER ALBUM -->
-                    <div class="relative rounded-3xl overflow-hidden mb-12 p-8 md:p-12 border border-white/10 shadow-2xl">
+                    <div class="relative rounded-3xl overflow-hidden mb-12 p-8 md:p-16 border border-white/10 bg-gradient-to-br from-gray-900 to-black flex flex-col items-center text-center shadow-2xl">
+                        <div class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border-4 border-white/10 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                             <i class="ph-fill ph-microphone-stage text-6xl md:text-8xl text-gray-600"></i>
+                        </div>
+                        <h1 class="text-4xl md:text-7xl font-black mb-4 drop-shadow-lg">${currentArtistData.artistName}</h1>
+                        <p class="text-pink-500 font-bold tracking-widest uppercase mb-6">${currentArtistData.primaryGenreName || 'Musique'}</p>
+                        <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-[#1DB954]/20 text-[#1DB954] hover:bg-[#1DB954] hover:text-black border border-[#1DB954]/50 px-6 py-2 rounded-full font-bold transition-all flex items-center gap-2">
+                            <i class="ph-fill ph-apple-logo text-xl"></i> Écouter sur Apple Music
+                        </a>
+                    </div>
+
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-white/10 pb-4"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
+                    <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+                    </div>
+                </div>
+            `;
+
+            // Récupérer les albums de l'artiste
+            try {
+                const res = await fetch(`https://itunes.apple.com/lookup?id=${currentArtistData.artistId}&entity=album&limit=200`);
+                const data = await res.json();
+                
+                const albumsContainer = document.getElementById('artist-albums-container');
+                albumsContainer.innerHTML = '';
+
+                // results[0] est l'artiste, les suivants sont les albums
+                const albums = data.results.filter(item => item.wrapperType === 'collection');
+                
+                // Trier par date (plus récent en premier)
+                albums.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+
+                if(albums.length === 0) albumsContainer.innerHTML = `<p class="text-gray-400 col-span-full">Aucun album trouvé.</p>`;
+
+                albums.forEach(album => renderSearchAlbumCard(album, albumsContainer));
+
+            } catch (e) {
+                document.getElementById('artist-albums-container').innerHTML = `<p class="text-red-500 col-span-full">Erreur de chargement de la discographie.</p>`;
+            }
+        }
+
+
+        async function renderAlbumView(container) {
+            if(!currentAlbumData) return switchView('search');
+            
+            const releaseYear = new Date(currentAlbumData.releaseDate).getFullYear();
+            const fullDate = new Date(currentAlbumData.releaseDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            container.innerHTML = `
+                <div class="animate-fade-in">
+                    <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+                        <i class="ph ph-arrow-left text-xl"></i> Retour
+                    </button>
+
+                    <!-- HEADER ALBUM ULTRA RICHE -->
+                    <div class="relative rounded-[2.5rem] overflow-hidden mb-12 border border-white/10 shadow-2xl">
+                        <!-- Blur Background -->
                         <div class="absolute inset-0 z-0">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-3xl opacity-30 scale-110">
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-[80px] opacity-40 scale-110">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent"></div>
                         </div>
                         
-                        <div class="relative z-10 flex flex-col md:flex-row gap-10 items-end">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-64 md:h-64 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20">
-                            <div class="flex-1 w-full">
-                                <h1 class="text-4xl md:text-6xl font-black mb-2 leading-tight drop-shadow-lg">${currentAlbumData.collectionName}</h1>
-                                <p class="text-xl text-gray-300 font-light mb-6 flex items-center gap-2">
-                                    <i class="ph-fill ph-user text-pink-500"></i> ${currentAlbumData.artistName}
+                        <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-end">
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-72 md:h-72 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/20 z-20 object-cover">
+                            <div class="flex-1 w-full z-20">
+                                <div class="inline-block bg-white/10 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest text-pink-300 border border-white/10 mb-4">
+                                    ${currentAlbumData.primaryGenreName} • ${currentAlbumData.trackCount} Titres
+                                </div>
+                                <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-3 leading-tight drop-shadow-xl text-balance">${currentAlbumData.collectionName}</h1>
+                                
+                                <!-- Lien vers l'artiste interactif -->
+                                <p class="text-xl md:text-2xl text-gray-300 font-medium mb-6 flex items-center gap-2 cursor-pointer hover:text-white transition-colors w-max" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
+                                    <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-orange-400 flex items-center justify-center shadow-lg"><i class="ph-fill ph-user text-white text-sm"></i></span>
+                                    ${currentAlbumData.artistName}
                                 </p>
                                 
-                                <div class="glass-panel rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-                                    <div>
-                                        <p class="text-sm text-gray-400 mb-1 uppercase tracking-wider font-bold">Moyenne Globale</p>
-                                        <div class="flex items-end gap-2">
-                                            <div id="global-score-display" class="text-6xl font-black text-white">0.0</div>
-                                            <span class="text-2xl text-gray-500 font-bold mb-1">/ 10</span>
+                                <p class="text-sm text-gray-400 mb-8 max-w-xl line-clamp-2" title="${currentAlbumData.copyright}">${currentAlbumData.copyright || `Sorti le ${fullDate}`}</p>
+                                
+                                <div class="glass-panel rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 border-white/5">
+                                    <div class="flex items-center gap-6">
+                                        <div>
+                                            <p class="text-xs text-gray-500 mb-1 uppercase font-bold tracking-wider">Note de l'Album</p>
+                                            <div class="flex items-baseline gap-1">
+                                                <div id="global-score-display" class="text-5xl md:text-6xl font-black text-white transition-colors duration-300">0.0</div>
+                                                <span class="text-xl text-gray-600 font-bold">/10</span>
+                                            </div>
                                         </div>
                                     </div>
                                     
-                                    <button onclick="saveRatingsToDB()" class="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-105 shadow-[0_0_20px_rgba(236,72,153,0.4)] flex items-center justify-center gap-2">
-                                        <i class="ph ph-floppy-disk text-xl"></i> Sauvegarder
-                                    </button>
+                                    <div class="flex gap-3 w-full lg:w-auto">
+                                        <button onclick="saveRatingsToDB()" class="w-full lg:w-auto bg-white text-black hover:bg-gray-200 px-8 py-4 rounded-2xl font-black transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                            <i class="ph-bold ph-floppy-disk text-xl"></i> Enregistrer
+                                        </button>
+                                        <button onclick="shareAlbum()" class="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-colors border border-white/10 flex items-center justify-center">
+                                            <i class="ph-bold ph-share-network text-xl text-white"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- PISTES -->
-                    <div id="tracklist-container" class="space-y-4">
-                        <div class="text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+                    <div id="tracklist-container" class="space-y-3">
+                        <div class="text-center py-20"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
                     </div>
                 </div>
             `;
 
-            // Récupérer les chansons de l'album via l'API Apple
+            // Récupérer les chansons
             try {
                 const res = await fetch(`https://itunes.apple.com/lookup?id=${currentAlbumData.collectionId}&entity=song`);
                 const data = await res.json();
                 currentTracksData = data.results.filter(item => item.wrapperType === 'track');
                 
-                // Récupérer les notes existantes depuis Supabase
                 await loadExistingRatings();
-                
-                // Dessiner les pistes
                 renderTracks();
             } catch (e) {
-                document.getElementById('tracklist-container').innerHTML = `<p class="text-red-500">Erreur lors du chargement des pistes.</p>`;
+                document.getElementById('tracklist-container').innerHTML = `<p class="text-red-500 text-center bg-red-500/10 p-4 rounded-xl border border-red-500/30">Erreur lors du chargement des pistes.</p>`;
             }
         }
 
-        // --- STREAMING_CHUNK: GESTION DES NOTES ET CALCULS ---
+        // Helper pour le lien vers l'artiste
+        async function searchAndGoToArtist(artistName) {
+            showToast("Recherche de l'artiste...", "success");
+            const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=musicArtist&limit=1`);
+            const data = await res.json();
+            if(data.results.length > 0) {
+                currentArtistData = data.results[0];
+                switchView('artist');
+            } else {
+                showToast("Artiste non trouvé dans la base de données API.", "error");
+            }
+        }
+
+        function shareAlbum() {
+            showToast("Lien copié dans le presse-papier ! (Simulation)", "success");
+        }
+
         async function loadExistingRatings() {
-            trackRatingsState = {}; // Réinitialiser
+            trackRatingsState = {};
             const { data } = await supabaseClient
                 .from('album_ratings')
                 .select('track_ratings')
@@ -357,7 +513,7 @@
 
         function renderTracks() {
             const container = document.getElementById('tracklist-container');
-            container.innerHTML = '<h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-music-notes text-purple-500"></i> Chansons</h2>';
+            container.innerHTML = '<h2 class="text-2xl font-bold mb-6 mt-4 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes</h2>';
 
             currentTracksData.forEach(track => {
                 const minutes = Math.floor(track.trackTimeMillis / 60000);
@@ -367,34 +523,40 @@
                 const existingData = trackRatingsState[track.trackId] || { score: '', note: '' };
 
                 const trackDiv = document.createElement('div');
-                trackDiv.className = "glass-panel p-5 rounded-2xl flex flex-col lg:flex-row gap-6 border-l-4 border-l-transparent hover:border-l-pink-500 transition-all group";
+                trackDiv.className = "glass-panel p-4 md:p-5 rounded-2xl flex flex-col lg:flex-row gap-4 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:border-l-white/30 transition-all group";
                 trackDiv.innerHTML = `
-                    <div class="flex items-center gap-4 lg:w-1/3">
-                        <span class="text-gray-500 font-bold w-6">${track.trackNumber}.</span>
-                        <div>
-                            <h3 class="font-bold text-lg leading-tight text-white group-hover:text-pink-400 transition-colors">${track.trackName}</h3>
-                            <p class="text-xs text-gray-500 flex items-center gap-1 mt-1"><i class="ph ph-clock"></i> ${timeStr}</p>
+                    <div class="flex items-center gap-4 lg:w-[35%]">
+                        <span class="text-gray-500 font-bold w-6 text-right">${track.trackNumber}.</span>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-base md:text-lg leading-tight text-white group-hover:text-pink-300 transition-colors line-clamp-2">${track.trackName}</h3>
+                            <div class="flex items-center gap-3 mt-1">
+                                <p class="text-xs text-gray-500 flex items-center gap-1 font-medium"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
+                                ${track.trackExplicitness === 'explicit' ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-bold text-gray-400">E</span>' : ''}
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="flex-1 flex flex-col sm:flex-row gap-4">
-                        <textarea 
-                            id="note-${track.trackId}"
-                            placeholder="Qu'avez-vous pensé de cette piste ?"
-                            class="flex-1 bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-gray-200 focus:border-purple-500 resize-none h-14"
-                            onchange="updateTrackState(${track.trackId}, 'note', this.value)"
-                        >${existingData.note}</textarea>
+                    <div class="flex-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                        <div class="relative w-full flex-1">
+                            <i class="ph-fill ph-quotes absolute left-3 top-3 text-gray-600"></i>
+                            <textarea 
+                                id="note-${track.trackId}"
+                                placeholder="Votre critique de cette piste..."
+                                class="w-full bg-black/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-gray-200 focus:border-purple-500 focus:bg-black resize-none h-12 transition-all hover:border-white/20"
+                                onchange="updateTrackState(${track.trackId}, 'note', this.value)"
+                            >${existingData.note}</textarea>
+                        </div>
                         
-                        <div class="flex items-center gap-3 bg-black/40 px-4 rounded-xl border border-white/10">
+                        <div class="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-xl border border-white/10 focus-within:border-pink-500 transition-colors shrink-0">
+                            <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
                             <input 
                                 id="score-${track.trackId}"
                                 type="number" min="0" max="10" step="0.1" 
                                 value="${existingData.score}"
                                 oninput="updateTrackState(${track.trackId}, 'score', this.value)"
-                                class="w-16 bg-transparent text-center text-2xl font-black text-white focus:outline-none placeholder-gray-700"
+                                class="w-14 bg-transparent text-center text-xl md:text-2xl font-black text-white focus:outline-none placeholder-gray-700"
                                 placeholder="-"
                             >
-                            <span class="text-gray-500 font-bold">/ 10</span>
                         </div>
                     </div>
                 `;
@@ -404,18 +566,16 @@
             updateGlobalAverageDisplay();
         }
 
-        // Met à jour l'état local quand on tape dans un input
         window.updateTrackState = function(trackId, field, value) {
             if(!trackRatingsState[trackId]) trackRatingsState[trackId] = { score: '', note: '' };
             trackRatingsState[trackId][field] = value;
             if(field === 'score') updateGlobalAverageDisplay();
         };
 
-        // Calcul Mathématique de la moyenne
         function updateGlobalAverageDisplay() {
             const scores = Object.values(trackRatingsState)
                 .map(t => parseFloat(t.score))
-                .filter(s => !isNaN(s));
+                .filter(s => !isNaN(s) && s >= 0 && s <= 10);
             
             let avg = 0;
             if(scores.length > 0) {
@@ -425,14 +585,20 @@
             const display = document.getElementById('global-score-display');
             display.innerText = avg;
             
-            // Couleurs conditionnelles
-            display.className = `text-6xl font-black ${avg >= 8 ? 'text-green-400' : avg >= 5 ? 'text-yellow-400' : 'text-red-400'}`;
+            // Couleurs conditionnelles pour le design
+            display.classList.remove('text-green-400', 'text-yellow-400', 'text-red-400', 'text-white');
+            if (avg === 0) display.classList.add('text-white');
+            else if (avg >= 8) display.classList.add('text-green-400');
+            else if (avg >= 5) display.classList.add('text-yellow-400');
+            else display.classList.add('text-red-400');
         }
 
-        // Sauvegarder dans Supabase
         window.saveRatingsToDB = async function() {
             const globalAvg = parseFloat(document.getElementById('global-score-display').innerText);
-            
+            if(globalAvg === 0 && Object.keys(trackRatingsState).length === 0) {
+                return showToast("Notez au moins une piste avant de sauvegarder.", "error");
+            }
+
             const payload = {
                 user_id: currentUser.id,
                 album_id: currentAlbumData.collectionId.toString(),
@@ -443,60 +609,72 @@
                 track_ratings: trackRatingsState
             };
 
-            // Vérifier si l'album existe déjà
-            const { data: existing } = await supabaseClient
+            // 1. Vérifier si l'album existe
+            const { data: existing, error: checkError } = await supabaseClient
                 .from('album_ratings')
                 .select('id')
                 .eq('user_id', currentUser.id)
                 .eq('album_id', payload.album_id);
 
+            if(checkError) return showToast(checkError.message, "error");
+
             let error;
             if (existing && existing.length > 0) {
-                // Update
+                // UPDATE (Règle le bug des doublons)
                 const res = await supabaseClient.from('album_ratings').update(payload).eq('id', existing[0].id);
                 error = res.error;
             } else {
-                // Insert
+                // INSERT
                 const res = await supabaseClient.from('album_ratings').insert([payload]);
                 error = res.error;
             }
 
-            if (error) alert("Erreur : " + error.message);
-            else alert("Album sauvegardé dans votre profil !");
+            if (error) {
+                console.error(error);
+                showToast("Erreur BD. Vérifiez vos règles RLS dans Supabase.", "error");
+            } else {
+                showToast("Sauvegarde réussie dans votre journal !", "success");
+            }
         };
 
-        // --- STREAMING_CHUNK: VUE PROFIL PUBLIC ---
         async function renderProfile(container) {
-            container.innerHTML = `<div class="text-center py-20"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>`;
+            container.innerHTML = `<div class="text-center py-32"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="mt-4 text-gray-400 font-medium">Chargement de votre journal...</p></div>`;
 
-            // Récupérer tous les albums notés
-            const { data } = await supabaseClient
+            const { data, error } = await supabaseClient
                 .from('album_ratings')
                 .select('*')
                 .eq('user_id', currentUser.id)
                 .order('created_at', { ascending: false });
+
+            if(error) return container.innerHTML = `<p class="text-red-500 text-center py-20">Erreur: ${error.message}</p>`;
 
             const ratings = data || [];
 
             let albumsHTML = '';
             if(ratings.length === 0) {
                 albumsHTML = `
-                    <div class="col-span-full text-center py-20 glass-panel rounded-3xl">
-                        <i class="ph ph-music-notes text-6xl text-gray-600 mb-4"></i>
-                        <p class="text-xl text-gray-400">Aucun album noté pour le moment.</p>
+                    <div class="col-span-full text-center py-20 glass-panel rounded-[2rem] border-dashed border-2 border-white/10">
+                        <i class="ph-fill ph-folder-open text-6xl text-gray-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">Votre journal est vide</h3>
+                        <p class="text-gray-400 mb-6">Commencez à noter des albums pour construire votre identité musicale.</p>
+                        <button onclick="switchView('search')" class="bg-white text-black px-6 py-3 rounded-full font-bold">Explorer la musique</button>
                     </div>
                 `;
             } else {
                 ratings.forEach(rating => {
                     albumsHTML += `
-                        <div class="glass-panel p-4 rounded-2xl flex gap-4 group cursor-pointer hover:bg-white/5 transition-all">
-                            <img src="${rating.cover_url}" class="w-24 h-24 rounded-xl object-cover shadow-lg group-hover:scale-105 transition-transform">
-                            <div class="flex flex-col justify-center">
-                                <h3 class="font-bold text-lg leading-tight mb-1 line-clamp-1">${rating.album_title}</h3>
-                                <p class="text-sm text-gray-400 mb-3">${rating.artist_name}</p>
-                                <div class="inline-flex items-center gap-1 bg-black/40 px-3 py-1 rounded-lg w-max border border-white/5">
-                                    <i class="ph-fill ph-star text-yellow-500"></i>
-                                    <span class="font-black text-white">${rating.global_rating}</span>
+                        <div class="glass-panel p-3 rounded-2xl flex flex-col md:flex-row gap-4 group hover:bg-white/5 hover:border-white/20 transition-all border border-transparent shadow-lg">
+                            <img src="${rating.cover_url}" class="w-full md:w-32 aspect-square rounded-xl object-cover shadow-md">
+                            <div class="flex flex-col justify-center flex-1 py-2">
+                                <h3 class="font-bold text-lg md:text-xl leading-tight mb-1 text-white group-hover:text-pink-300 transition-colors">${rating.album_title}</h3>
+                                <p class="text-sm text-gray-400 font-medium mb-auto">${rating.artist_name}</p>
+                                
+                                <div class="flex items-center justify-between mt-4">
+                                    <div class="inline-flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-lg border border-white/10">
+                                        <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
+                                        <span class="font-black text-white">${rating.global_rating}</span>
+                                    </div>
+                                    <span class="text-xs text-gray-600 font-medium">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
                                 </div>
                             </div>
                         </div>
@@ -505,29 +683,35 @@
             }
 
             container.innerHTML = `
-                <div class="animate-fade-in">
+                <div class="animate-fade-in max-w-6xl mx-auto">
                     <!-- HEADER PROFIL -->
-                    <div class="glass-panel rounded-3xl p-8 mb-12 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-                        <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 flex items-center justify-center relative z-10">
+                    <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(236,72,153,0.3)]">
                             <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-4 border-[#0a0a0f]">
-                                <i class="ph-fill ph-user text-5xl text-white/50"></i>
+                                <i class="ph-fill ph-user text-6xl text-white/50"></i>
                             </div>
                         </div>
                         
                         <div class="flex-1 text-center md:text-left z-10">
-                            <h1 class="text-3xl font-black mb-2">${currentUser.email.split('@')[0]}</h1>
-                            <p class="text-gray-400 mb-6">${currentUser.email}</p>
+                            <h1 class="text-4xl font-black mb-2">${currentUser.email.split('@')[0]}</h1>
+                            <p class="text-gray-400 font-medium mb-8 flex items-center justify-center md:justify-start gap-2">
+                                <i class="ph-fill ph-envelope-simple text-gray-500"></i> ${currentUser.email}
+                            </p>
                             
                             <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                                <div class="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-center">
-                                    <span class="block text-2xl font-black text-pink-400">${ratings.length}</span>
-                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-wider">Albums Notés</span>
+                                <div class="bg-black/40 border border-white/10 px-8 py-4 rounded-2xl text-center">
+                                    <span class="block text-3xl font-black text-pink-400 mb-1">${ratings.length}</span>
+                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Albums Notés</span>
+                                </div>
+                                <div class="bg-black/40 border border-white/10 px-8 py-4 rounded-2xl text-center">
+                                    <span class="block text-3xl font-black text-purple-400 mb-1">0</span>
+                                    <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Abonnés</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-vinyl-record text-purple-500"></i> Mon Journal Audio</h2>
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-vinyl-record text-pink-500 text-3xl"></i> Le Journal</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         ${albumsHTML}
                     </div>
