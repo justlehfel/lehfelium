@@ -6,6 +6,11 @@
     <title>SoundRate - Minimal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        // Vercel Speed Insights
+        import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@1/dist/index.mjs';
+        injectSpeedInsights();
+    </script>
     <style>
         /* Animations douces */
         body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #111; }
