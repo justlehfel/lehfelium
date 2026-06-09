@@ -2,87 +2,78 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lehfilium - L'Archive Musicale</title>
-    
-    <!-- Tailwind CSS pour le design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap');
-        
         body { font-family: 'Inter', sans-serif; background-color: #0a0a0f; color: #ffffff; overflow-x: hidden; }
-
+ 
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(2deg); }
         }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
+        @keyframes pulse-slow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
+ 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .glass-panel {
             background: rgba(20, 20, 25, 0.6);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input:focus, textarea:focus { outline: none; }
-        
         .shimmer {
             background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
         @keyframes shimmer { to { background-position: -200% 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+ 
+        /* Mobile nav label hide */
+        @media (max-width: 767px) {
+            .nav-label { display: none; }
+            #app-screen { flex-direction: row; }
+        }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white relative">
-
-    <!-- Background Animé -->
+ 
     <div class="fixed inset-0 z-0 pointer-events-none opacity-40 overflow-hidden">
         <div class="absolute top-[0%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/30 blur-[120px] animate-float"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/20 blur-[150px] animate-float" style="animation-delay: -3s;"></div>
-        <div class="absolute top-[40%] left-[60%] w-[300px] h-[300px] rounded-full bg-blue-600/10 blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute top-[40%] left-[60%] w-[300px] h-[300px] rounded-full bg-blue-600/10 blur-[100px]" style="animation: pulse-slow 4s ease-in-out infinite;"></div>
     </div>
-
-    <!-- Conteneur Popups (Toasts) -->
-    <div id="toast-container" class="fixed top-6 right-4 md:right-6 z-[100] flex flex-col gap-3"></div>
-
-    <!-- Écran d'authentification -->
+ 
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-3 max-w-xs w-full"></div>
+ 
+    <!-- AUTH SCREEN -->
     <div id="auth-screen" class="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div class="glass-panel p-8 md:p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl animate-fade-in border-t border-l border-white/20">
             <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(236,72,153,0.4)]">
                 <i class="ph ph-vinyl-record text-3xl text-white"></i>
             </div>
-            
             <h1 class="text-3xl font-black text-center mb-2">Lehfilium</h1>
             <p class="text-center text-gray-400 mb-8 font-light">L'archive musicale universelle.</p>
-
             <div class="space-y-4">
                 <input id="auth-email" type="email" placeholder="Email audiophile" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:border-pink-500 transition-all">
                 <input id="auth-password" type="password" placeholder="Mot de passe" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:border-purple-500 transition-all">
-                
                 <button onclick="handleAuth('login')" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-2xl px-5 py-4 mt-4 transition-transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2">
                     <i class="ph-bold ph-sign-in"></i> Se connecter
                 </button>
@@ -92,587 +83,637 @@
             </div>
         </div>
     </div>
-
-    <!-- Application Principale -->
-    <div id="app-screen" class="relative z-10 hidden flex-col md:flex-row h-screen overflow-hidden">
-        
-        <!-- Sidebar Desktop -->
-        <nav class="hidden md:flex w-64 glass-panel border-r border-white/10 flex-col py-8 transition-all duration-300 h-full shrink-0 z-20">
-            <div class="flex items-center gap-3 px-8 mb-12 cursor-pointer" onclick="switchView('home')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg">
-                    <i class="ph-fill ph-vinyl-record text-white text-xl"></i>
+ 
+    <!-- APP SCREEN -->
+    <div id="app-screen" class="relative z-10 hidden flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <nav class="w-16 md:w-64 glass-panel border-r border-white/10 flex flex-col items-center md:items-start py-6 md:py-8 shrink-0 transition-all duration-300 overflow-y-auto">
+            <div class="flex items-center gap-3 px-0 md:px-8 mb-8 md:mb-12 cursor-pointer justify-center md:justify-start" onclick="switchView('home')">
+                <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0">
+                    <i class="ph-fill ph-vinyl-record text-white text-lg md:text-xl"></i>
                 </div>
-                <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">Lehfilium</span>
+                <span class="text-xl font-black hidden md:block bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">Lehfilium</span>
             </div>
-
-            <div class="flex-1 w-full px-4 space-y-2">
-                <button onclick="switchView('home')" id="nav-home" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 bg-white/10 text-white">
-                    <i class="ph ph-house text-2xl"></i> <span class="font-medium">Accueil</span>
+ 
+            <div class="flex-1 w-full px-2 md:px-4 space-y-1 md:space-y-2">
+                <button onclick="switchView('home')" id="nav-home" class="nav-btn w-full flex items-center gap-0 md:gap-4 justify-center md:justify-start px-2 md:px-4 py-3 rounded-2xl transition-all duration-300 bg-white/10 text-white">
+                    <i class="ph ph-house text-xl md:text-2xl"></i>
+                    <span class="font-medium nav-label hidden md:block">Accueil</span>
                 </button>
-                <button onclick="switchView('search')" id="nav-search" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-magnifying-glass text-2xl"></i> <span class="font-medium">Recherche</span>
+                <button onclick="switchView('search')" id="nav-search" class="nav-btn w-full flex items-center gap-0 md:gap-4 justify-center md:justify-start px-2 md:px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
+                    <i class="ph ph-magnifying-glass text-xl md:text-2xl"></i>
+                    <span class="font-medium nav-label hidden md:block">Recherche</span>
                 </button>
-                <button onclick="switchView('community')" id="nav-community" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-users-three text-2xl"></i> <span class="font-medium">Communauté</span>
+                <button onclick="switchView('community')" id="nav-community" class="nav-btn w-full flex items-center gap-0 md:gap-4 justify-center md:justify-start px-2 md:px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
+                    <i class="ph ph-users-three text-xl md:text-2xl"></i>
+                    <span class="font-medium nav-label hidden md:block">Communauté</span>
                 </button>
-                <button onclick="switchView('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-user text-2xl"></i> <span class="font-medium">Mon Profil</span>
+                <button onclick="switchView('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-0 md:gap-4 justify-center md:justify-start px-2 md:px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
+                    <i class="ph ph-user text-xl md:text-2xl"></i>
+                    <span class="font-medium nav-label hidden md:block">Mon Profil</span>
                 </button>
             </div>
-
-            <div class="w-full px-4 mt-auto">
-                <button onclick="logOut()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                    <i class="ph ph-sign-out text-2xl"></i> <span class="font-medium">Déconnexion</span>
+ 
+            <div class="w-full px-2 md:px-4 mt-auto pt-4">
+                <button onclick="logOut()" class="w-full flex items-center gap-0 md:gap-4 justify-center md:justify-start px-2 md:px-4 py-3 rounded-2xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    <i class="ph ph-sign-out text-xl md:text-2xl"></i>
+                    <span class="font-medium nav-label hidden md:block">Déconnexion</span>
                 </button>
             </div>
         </nav>
-
-        <!-- Navbar Mobile (Bottom) -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-50 flex justify-around items-center p-2 backdrop-blur-2xl bg-[#0a0a0f]/95 pb-safe">
-            <button onclick="switchView('home')" id="nav-mobile-home" class="nav-btn-mobile flex flex-col items-center gap-1 text-pink-400 p-2 transition-colors">
-                <i class="ph-fill ph-house text-2xl"></i><span class="text-[10px] font-bold">Accueil</span>
-            </button>
-            <button onclick="switchView('search')" id="nav-mobile-search" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
-                <i class="ph-fill ph-magnifying-glass text-2xl"></i><span class="text-[10px] font-bold">Recherche</span>
-            </button>
-            <button onclick="switchView('community')" id="nav-mobile-community" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
-                <i class="ph-fill ph-users-three text-2xl"></i><span class="text-[10px] font-bold">Social</span>
-            </button>
-            <button onclick="switchView('profile')" id="nav-mobile-profile" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
-                <i class="ph-fill ph-user text-2xl"></i><span class="text-[10px] font-bold">Profil</span>
-            </button>
-        </nav>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-10 pb-28 md:pb-10 relative z-10 w-full" id="main-content">
-            <!-- Vues injectées ici -->
-        </main>
+ 
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-3 md:p-10" id="main-content"></main>
     </div>
-
+ 
     <script>
-        // --- INITIALISATION SUPABASE ---
+    (function() {
         const { createClient } = window.supabase;
         const SUPABASE_URL = 'https://ydzgypqykkwqqnqttaaj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlkemd5cHF5a2t3cXFucXR0YWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NjM3NzcsImV4cCI6MjA5NjUzOTc3N30.ax7ZOCH9TffTXBwaR2Jd4gPH8c2rq5Do__gxsjylXOA';
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Variables Globales
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
+        // Global State
         let currentUser = null;
         let currentAlbumData = null;
         let currentArtistData = null;
         let currentTracksData = [];
         let trackRatingsState = {};
-        
         let currentSearchQuery = "";
-        let currentSearchFilter = "tous"; 
-
-        // --- TOAST NOTIFICATIONS ---
+        let currentSearchFilter = "tous";
+ 
+        // ─── TOAST ───────────────────────────────────────────────────────────
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const isError = type === 'error';
-            toast.className = `glass-panel ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} px-5 py-3 rounded-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 shadow-2xl backdrop-blur-3xl`;
-            toast.innerHTML = `<i class="ph-fill ${isError ? 'ph-warning-circle text-red-400' : 'ph-check-circle text-green-400'} text-xl"></i><span class="font-medium text-white text-sm">${message}</span>`;
-            
+            toast.className = `glass-panel ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} px-4 py-3 rounded-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 shadow-2xl`;
+            toast.innerHTML = `<i class="ph-fill ${isError ? 'ph-warning-circle text-red-400' : 'ph-check-circle text-green-400'} text-xl shrink-0"></i><span class="font-medium text-white text-sm">${message}</span>`;
             container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+            requestAnimationFrame(() => { requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0')); });
             setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3500);
         }
-
-        // --- AUTHENTIFICATION ---
+        window.showToast = showToast;
+ 
+        // ─── AUTH & ROUTING ──────────────────────────────────────────────────
         async function checkSession() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) {
-                currentUser = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const sharedUserId = urlParams.get('user');
-                
-                if (sharedUserId) {
-                    renderProfile(document.getElementById('main-content'), sharedUserId);
-                    window.history.replaceState({}, document.title, window.location.pathname);
+            try {
+                const { data: { user } } = await sb.auth.getUser();
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('app-screen').classList.remove('hidden');
+                    document.getElementById('app-screen').classList.add('flex');
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sharedUserId = urlParams.get('user');
+                    if (sharedUserId) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        renderProfile(document.getElementById('main-content'), sharedUserId);
+                    } else {
+                        switchView('home');
+                    }
                 } else {
-                    switchView('home');
+                    document.getElementById('auth-screen').classList.remove('hidden');
+                    document.getElementById('app-screen').classList.add('hidden');
+                    document.getElementById('app-screen').classList.remove('flex');
                 }
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
+            } catch(e) {
+                console.error('Session check error:', e);
             }
         }
-
+ 
         async function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
+            const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
-            if(!email || !password) return showToast("Veuillez remplir tous les champs.", "error");
-
+            if (!email || !password) return showToast("Veuillez remplir tous les champs.", "error");
             let result;
-            if(type === 'login') result = await supabaseClient.auth.signInWithPassword({ email, password });
-            if(type === 'signup') result = await supabaseClient.auth.signUp({ email, password });
-
-            if(result.error) showToast(result.error.message.includes("Invalid login") ? "Identifiants incorrects." : result.error.message, "error");
-            else if (type === 'signup') showToast("Compte créé ! Vous pouvez vous connecter.", "success");
-            else { showToast("Connexion réussie !", "success"); checkSession(); }
+            if (type === 'login') result = await sb.auth.signInWithPassword({ email, password });
+            if (type === 'signup') result = await sb.auth.signUp({ email, password });
+            if (result.error) {
+                showToast(result.error.message.includes("Invalid login") ? "Identifiants incorrects." : result.error.message, "error");
+            } else if (type === 'signup') {
+                showToast("Compte créé ! Vous pouvez vous connecter.", "success");
+            } else {
+                showToast("Connexion réussie !", "success");
+                checkSession();
+            }
         }
-
+        window.handleAuth = handleAuth;
+ 
         async function logOut() {
-            await supabaseClient.auth.signOut();
+            await sb.auth.signOut();
             currentUser = null;
-            showToast("Déconnecté.", "success");
+            showToast("Déconnecté avec succès.", "success");
             checkSession();
         }
-
-        // --- NAVIGATION ROUTER ---
-        function switchView(viewName) {
-            // Update Desktop Nav
+        window.logOut = logOut;
+ 
+        function setActiveNav(viewName) {
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-white/10', 'text-white');
                 btn.classList.add('text-gray-500');
             });
             const activeBtn = document.getElementById(`nav-${viewName}`);
-            if(activeBtn) {
+            if (activeBtn) {
                 activeBtn.classList.remove('text-gray-500');
                 activeBtn.classList.add('bg-white/10', 'text-white');
             }
-
-            // Update Mobile Nav
-            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
-                btn.classList.remove('text-pink-400');
-                btn.classList.add('text-gray-500');
-            });
-            const activeMobileBtn = document.getElementById(`nav-mobile-${viewName}`);
-            if(activeMobileBtn) {
-                activeMobileBtn.classList.remove('text-gray-500');
-                activeMobileBtn.classList.add('text-pink-400');
-            }
-
+        }
+ 
+        function switchView(viewName) {
+            setActiveNav(viewName);
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = '';
-            document.getElementById('main-content').scrollTop = 0;
-
-            if(viewName === 'home') renderHome(mainContent);
-            if(viewName === 'search') renderSearch(mainContent);
-            if(viewName === 'community') renderCommunity(mainContent);
-            if(viewName === 'album') renderAlbumView(mainContent);
-            if(viewName === 'artist') renderArtistView(mainContent);
-            if(viewName === 'profile') renderProfile(mainContent, currentUser.id);
+            mainContent.scrollTop = 0;
+ 
+            if (viewName === 'home') renderHome(mainContent);
+            else if (viewName === 'search') renderSearch(mainContent);
+            else if (viewName === 'community') renderCommunity(mainContent);
+            else if (viewName === 'album') renderAlbumView(mainContent);
+            else if (viewName === 'artist') renderArtistView(mainContent);
+            else if (viewName === 'profile') renderProfile(mainContent, currentUser.id);
         }
-
-        // --- API HELPERS ---
+        window.switchView = switchView;
+ 
+        // ─── ITUNES FETCH HELPER (with CORS proxy fallback) ──────────────────
+        async function itunesFetch(url) {
+            // Add callback param to force JSONP-like response, use cors mode
+            const res = await fetch(url + (url.includes('?') ? '&' : '?') + '_cachebust=' + Date.now(), {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        }
+ 
+        // ─── WIKIPEDIA ───────────────────────────────────────────────────────
         async function fetchWikiData(query) {
             try {
-                let res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
-                if(res.ok) return await res.json();
-                res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query + " (groupe)")}`);
-                if(res.ok) return await res.json();
-                res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query + " (album)")}`);
-                if(res.ok) return await res.json();
+                const attempts = [
+                    query,
+                    query + ' (groupe)',
+                    query + ' (album)',
+                    query + ' (musicien)',
+                    query + ' (band)'
+                ];
+                for (const attempt of attempts) {
+                    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(attempt)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.extract && data.extract.length > 50) return data;
+                    }
+                }
+                // Try English Wikipedia as fallback
+                const resEn = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                if (resEn.ok) {
+                    const data = await resEn.json();
+                    if (data.extract && data.extract.length > 50) {
+                        data.extract = '[EN] ' + data.extract;
+                        return data;
+                    }
+                }
                 return null;
             } catch(e) { return null; }
         }
-
-        window.searchAndGoToArtist = async function(artistName) {
-            showToast("Recherche de l'artiste...", "success");
-            try {
-                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=musicArtist&limit=1`);
-                const data = await res.json();
-                if(data.results.length > 0) {
-                    currentArtistData = data.results[0];
-                    switchView('artist');
-                } else {
-                    showToast("Artiste introuvable dans les archives.", "error");
-                }
-            } catch(e) { showToast("Erreur réseau.", "error"); }
-        }
-
-        window.loadExistingRatings = async function() {
-            trackRatingsState = {};
-            if(!currentUser || !currentAlbumData) return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('album_ratings')
-                    .select('track_ratings')
-                    .eq('user_id', currentUser.id)
-                    .eq('album_id', currentAlbumData.collectionId.toString())
-                    .single();
-                
-                if (data && data.track_ratings) trackRatingsState = data.track_ratings;
-            } catch(e) { } // Pas grave s'il n'y a pas de notes existantes
-        }
-
-        // --- VUES PRINCIPALES ---
+ 
+        // ─── HOME ─────────────────────────────────────────────────────────────
         function renderHome(container) {
             container.innerHTML = `
-                <div class="animate-fade-in space-y-8 md:space-y-12 pb-4">
+                <div class="animate-fade-in space-y-8 md:space-y-12 pb-12">
                     <!-- Hero Section -->
-                    <div class="relative w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(236,72,153,0.15)] group border border-white/5">
+                    <div class="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(236,72,153,0.15)] group" style="min-height:320px;">
                         <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-purple-900/80 to-pink-900/60 z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2074" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000">
-                        <div class="relative z-20 h-full flex flex-col justify-center p-6 md:p-16 max-w-4xl">
-                            <span class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] md:text-xs font-bold tracking-widest uppercase w-max mb-4 md:mb-6 text-pink-300">Bienvenue sur Lehfilium</span>
-                            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight drop-shadow-xl text-balance">
-                                Archivez votre vie <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">musicale.</span>
+                        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2074" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt="">
+                        <div class="relative z-20 flex flex-col justify-center p-6 md:p-16 max-w-4xl" style="min-height:320px;">
+                            <span class="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase w-max mb-4 text-pink-300">Bienvenue sur Lehfilium</span>
+                            <h1 class="text-3xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight drop-shadow-xl">
+                                Archivez votre vie<br>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">musicale.</span>
                             </h1>
-                            <p class="text-base md:text-xl text-gray-300 mb-6 md:mb-8 max-w-2xl font-light">Lehfilium n'est pas qu'un outil de notation. C'est une encyclopédie vivante et sociale.</p>
-                            <button onclick="switchView('search')" class="bg-white text-black px-6 md:px-8 py-3 md:py-4 rounded-xl font-black w-max hover:scale-105 transition-transform flex items-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                                <i class="ph-bold ph-magnifying-glass text-xl"></i> Découvrir
+                            <p class="text-sm md:text-xl text-gray-300 mb-6 max-w-2xl font-light leading-relaxed">Lehfilium n'est pas qu'un outil de notation. C'est une encyclopédie vivante, sociale et complète qui vous permet de documenter, analyser et partager chaque vibration musicale.</p>
+                            <button onclick="switchView('search')" class="bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-xl font-black w-max hover:scale-105 transition-transform flex items-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.3)] text-sm md:text-base">
+                                <i class="ph-bold ph-magnifying-glass text-lg md:text-xl"></i> Commencer la recherche
                             </button>
                         </div>
                     </div>
-
+ 
                     <!-- Features -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up" style="animation-delay: 0.2s">
-                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 border border-purple-500/30">
-                                <i class="ph-fill ph-database text-2xl text-purple-400"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                        <div class="glass-panel p-6 md:p-8 rounded-2xl md:rounded-3xl border-t border-l border-white/10 hover:-translate-y-1 md:hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 md:w-14 md:h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 md:mb-6 border border-purple-500/30">
+                                <i class="ph-fill ph-database text-2xl md:text-3xl text-purple-400"></i>
                             </div>
-                            <h3 class="text-lg md:text-xl font-bold mb-2">Base de données infinie</h3>
-                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Découvrez l'histoire complète derrière chaque album, grâce aux API mondiales d'Apple et Wikipédia.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Base de données infinie</h3>
+                            <p class="text-gray-400 leading-relaxed text-sm md:text-base">Connecté à de multiples sources mondiales (Apple, Wikipédia). Découvrez l'histoire complète derrière chaque album, les membres, et l'origine des œuvres.</p>
                         </div>
-                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-12 h-12 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-4 border border-pink-500/30">
-                                <i class="ph-fill ph-sliders-horizontal text-2xl text-pink-400"></i>
+                        <div class="glass-panel p-6 md:p-8 rounded-2xl md:rounded-3xl border-t border-l border-white/10 hover:-translate-y-1 md:hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 md:w-14 md:h-14 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-4 md:mb-6 border border-pink-500/30">
+                                <i class="ph-fill ph-sliders-horizontal text-2xl md:text-3xl text-pink-400"></i>
                             </div>
-                            <h3 class="text-lg md:text-xl font-bold mb-2">Précision Chirurgicale</h3>
-                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Notez chaque chanson au dixième près (0.1). L'algorithme calculera la note globale avec rigueur.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Précision Chirurgicale</h3>
+                            <p class="text-gray-400 leading-relaxed text-sm md:text-base">Notez chaque chanson individuellement au dixième près (0.1). L'algorithme Lehfilium calculera la note globale de l'album avec rigueur mathématique.</p>
                         </div>
-                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 border border-blue-500/30">
-                                <i class="ph-fill ph-users-three text-2xl text-blue-400"></i>
+                        <div class="glass-panel p-6 md:p-8 rounded-2xl md:rounded-3xl border-t border-l border-white/10 hover:-translate-y-1 md:hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 md:mb-6 border border-blue-500/30">
+                                <i class="ph-fill ph-users-three text-2xl md:text-3xl text-blue-400"></i>
                             </div>
-                            <h3 class="text-lg md:text-xl font-bold mb-2">Social & Public</h3>
-                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Partagez votre journal, suivez l'avis de vos amis, et comparez vos goûts musicaux avec le monde.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Social & Public</h3>
+                            <p class="text-gray-400 leading-relaxed text-sm md:text-base">Générez votre profil public instantanément. Partagez votre journal, suivez vos amis, et comparez vos goûts musicaux avec le monde entier.</p>
                         </div>
                     </div>
                 </div>
             `;
         }
-
-        // --- RECHERCHE ---
+ 
+        // ─── SEARCH ───────────────────────────────────────────────────────────
         function renderSearch(container) {
             container.innerHTML = `
                 <div class="animate-fade-in">
-                    <form id="search-form" class="relative mb-6 max-w-4xl mx-auto">
-                        <i class="ph ph-magnifying-glass absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <input id="search-input" type="text" value="${currentSearchQuery}" placeholder="Toxicity, Daft Punk..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 md:pl-16 pr-24 md:pr-32 text-base md:text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
-                        <button type="submit" class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-4 md:px-8 font-bold transition-transform hover:scale-105 text-sm md:text-base">Chercher</button>
+                    <form id="search-form" class="relative mb-4 max-w-4xl mx-auto">
+                        <i class="ph ph-magnifying-glass absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg md:text-xl z-10"></i>
+                        <input id="search-input" type="text" value="${currentSearchQuery.replace(/"/g,'&quot;')}" placeholder="Toxicity, Daft Punk, Kendrick..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 md:pl-16 pr-28 md:pr-36 text-base md:text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
+                        <button type="submit" class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-4 md:px-8 font-bold transition-transform hover:scale-105 text-sm md:text-base">Rechercher</button>
                     </form>
-
-                    <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-10">
-                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'tous' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('tous')">Tous</button>
-                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">Album</button>
-                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'ep' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('ep')">EP</button>
-                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'single' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('single')">Single</button>
-                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'artist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('artist')">Artiste</button>
+ 
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-6 md:mb-10">
+                        ${['tous','album','ep','single','artist'].map(f => `
+                            <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full font-medium transition-all text-sm md:text-base ${currentSearchFilter === f ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('${f}')">${f === 'tous' ? 'Tous' : f === 'artist' ? 'Artiste' : f.toUpperCase()}</button>
+                        `).join('')}
                     </div>
-
-                    <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
+ 
+                    <div id="search-results" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 pb-12"></div>
                 </div>
             `;
-
-            if(currentSearchQuery) executeSearch(currentSearchQuery);
-
+ 
+            if (currentSearchQuery) executeSearch(currentSearchQuery);
+ 
             document.getElementById('search-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                currentSearchQuery = document.getElementById('search-input').value;
-                executeSearch(currentSearchQuery);
+                currentSearchQuery = document.getElementById('search-input').value.trim();
+                if (currentSearchQuery) executeSearch(currentSearchQuery);
             });
         }
-
+ 
         window.setFilter = function(type) {
             currentSearchFilter = type;
-            switchView('search'); 
+            switchView('search');
         };
-
+ 
         async function executeSearch(query) {
-            if(!query) return;
+            if (!query) return;
             const resultsContainer = document.getElementById('search-results');
-            resultsContainer.innerHTML = `<div class="col-span-full text-center py-20"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="text-gray-400 mt-4 font-medium tracking-wide">Fouille des archives mondiales...</p></div>`;
-
+            if (!resultsContainer) return;
+            resultsContainer.innerHTML = `<div class="col-span-full text-center py-16"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i><p class="text-gray-400 mt-4 font-medium">Interrogation des bases de données...</p></div>`;
+ 
             try {
                 let results = [];
-                // Pour maximiser les chances de trouver Toxicity ou des albums noyés, on monte la limite à 200
+                const country = 'us';
+ 
                 if (currentSearchFilter === 'tous') {
-                    const [resAlbums, resArtists] = await Promise.all([
-                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200`),
-                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=20`)
+                    const [r1, r2] = await Promise.all([
+                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=100&country=${country}`).then(r => r.json()),
+                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=20&country=${country}`).then(r => r.json())
                     ]);
-                    results = [...(await resArtists.json()).results, ...(await resAlbums.json()).results];
+                    results = [...r2.results, ...r1.results];
                 } else if (currentSearchFilter === 'artist') {
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=50`);
-                    results = (await res.json()).results;
+                    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=50&country=${country}`).then(r => r.json());
+                    results = r.results;
                 } else {
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200`);
-                    results = (await res.json()).results;
+                    // Fetch more results to increase chance of finding the right album
+                    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200&country=${country}`).then(r => r.json());
+                    results = r.results;
                 }
-                
+ 
+                if (!resultsContainer) return;
                 resultsContainer.innerHTML = '';
-                
-                if(results.length === 0) {
-                    resultsContainer.innerHTML = `<div class="col-span-full text-center py-10 bg-white/5 rounded-3xl border border-white/10"><i class="ph-fill ph-ghost text-6xl text-gray-600 mb-4"></i><p class="text-gray-400">Aucune archive trouvée pour "${query}".</p></div>`;
+ 
+                if (!results || results.length === 0) {
+                    resultsContainer.innerHTML = `<div class="col-span-full text-center py-16 glass-panel rounded-3xl border border-white/10"><i class="ph-fill ph-ghost text-5xl text-gray-600 mb-3"></i><p class="text-gray-400">Aucune archive trouvée pour "${query}".</p></div>`;
                     return;
                 }
-
+ 
+                // Filter
                 let filtered = results.filter(item => {
                     if (item.wrapperType === 'artist') return currentSearchFilter === 'tous' || currentSearchFilter === 'artist';
-                    
+                    if (!item.artistName) return false;
                     const artistLow = item.artistName.toLowerCase();
-                    if(artistLow.includes('karaoke') || artistLow.includes('tribute') || artistLow.includes('lullaby')) return false;
-
-                    if(currentSearchFilter === 'album') return item.trackCount > 6;
-                    if(currentSearchFilter === 'ep') return item.trackCount >= 4 && item.trackCount <= 6;
-                    if(currentSearchFilter === 'single') return item.trackCount <= 3;
+                    if (artistLow.includes('karaoke') || artistLow.includes('tribute') || artistLow.includes('lullaby')) return false;
+                    const tc = item.trackCount || 0;
+                    if (currentSearchFilter === 'album') return tc > 6;
+                    if (currentSearchFilter === 'ep') return tc >= 3 && tc <= 6;
+                    if (currentSearchFilter === 'single') return tc <= 3;
                     return true;
                 });
-
+ 
+                // Sort: exact matches first
                 filtered.sort((a, b) => {
-                    const nameA = a.wrapperType === 'artist' ? a.artistName : a.collectionName;
-                    const nameB = b.wrapperType === 'artist' ? b.artistName : b.collectionName;
-                    
-                    // Priorité absolue si le nom recherché est EXACTEMENT le nom de l'album (ex: Toxicity)
-                    const aExact = nameA.toLowerCase() === query.toLowerCase() ? 1 : 0;
-                    const bExact = nameB.toLowerCase() === query.toLowerCase() ? 1 : 0;
+                    const nameA = (a.wrapperType === 'artist' ? a.artistName : a.collectionName) || '';
+                    const nameB = (b.wrapperType === 'artist' ? b.artistName : b.collectionName) || '';
+                    const qLow = query.toLowerCase();
+                    const aExact = nameA.toLowerCase() === qLow ? 2 : nameA.toLowerCase().includes(qLow) ? 1 : 0;
+                    const bExact = nameB.toLowerCase() === qLow ? 2 : nameB.toLowerCase().includes(qLow) ? 1 : 0;
                     if (aExact !== bExact) return bExact - aExact;
-                    
                     if (a.wrapperType === 'artist' && b.wrapperType !== 'artist') return -1;
                     if (a.wrapperType !== 'artist' && b.wrapperType === 'artist') return 1;
-                    if (a.wrapperType !== 'artist' && b.wrapperType !== 'artist') return b.trackCount - a.trackCount;
-                    return 0;
+                    return (b.trackCount || 0) - (a.trackCount || 0);
                 });
-
-                filtered.slice(0, 40).forEach(item => {
+ 
+                filtered.slice(0, 50).forEach(item => {
                     if (item.wrapperType === 'artist') renderSearchArtistCard(item, resultsContainer);
                     else renderSearchAlbumCard(item, resultsContainer);
                 });
-                
-                if(filtered.length === 0) resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat dans cette catégorie.</p>`;
-                
+ 
+                if (filtered.length === 0) {
+                    resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat dans cette catégorie pour "${query}".</p>`;
+                }
             } catch(e) {
-                resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center">Erreur de connexion aux archives.</p>`;
+                console.error('Search error:', e);
+                if (resultsContainer) resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center py-10">Erreur de connexion aux archives. Réessayez.</p>`;
             }
         }
-
+ 
+        function getBadge(trackCount) {
+            if (!trackCount || trackCount > 6) return { text: 'Album', color: 'bg-purple-600' };
+            if (trackCount <= 3) return { text: 'Single', color: 'bg-blue-600' };
+            return { text: 'EP', color: 'bg-pink-600' };
+        }
+ 
         function renderSearchAlbumCard(album, container) {
-            let badgeText = "Album";
-            let badgeColor = "bg-purple-600";
-            if (album.trackCount <= 3) { badgeText = "Single"; badgeColor = "bg-blue-600"; }
-            else if (album.trackCount <= 6) { badgeText = "EP"; badgeColor = "bg-pink-600"; }
-
-            const highResImage = album.artworkUrl100.replace('100x100bb', '600x600bb');
-            
+            const { text: badgeText, color: badgeColor } = getBadge(album.trackCount);
+            const highResImage = (album.artworkUrl100 || '').replace('100x100bb', '600x600bb');
             const card = document.createElement('div');
-            card.className = "group cursor-pointer animate-slide-up flex flex-col";
+            card.className = "group cursor-pointer animate-fade-in flex flex-col";
             card.innerHTML = `
-                <div class="aspect-square rounded-2xl overflow-hidden mb-3 border border-white/10 relative shadow-lg bg-white/5">
-                    <span class="absolute top-2 left-2 ${badgeColor} text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 uppercase tracking-wider">${badgeText}</span>
-                    <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
+                <div class="aspect-square rounded-xl md:rounded-2xl overflow-hidden mb-2 md:mb-3 border border-white/10 relative shadow-lg bg-white/5">
+                    <span class="absolute top-1.5 left-1.5 md:top-2 md:left-2 ${badgeColor} text-[9px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded shadow-lg z-20 uppercase tracking-wider">${badgeText}</span>
+                    <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" onerror="this.style.display='none'">
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-                            <i class="ph-fill ph-plus text-black text-xl"></i>
+                        <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+                            <i class="ph-fill ph-plus text-black text-lg md:text-2xl"></i>
                         </div>
                     </div>
                 </div>
-                <h3 class="font-bold text-sm md:text-base leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${album.collectionName}</h3>
-                <p class="text-gray-400 text-xs md:text-sm truncate group-hover:text-white transition-colors">${album.artistName}</p>
-                <p class="text-[10px] md:text-xs text-gray-600 font-medium mt-auto pt-1">${album.primaryGenreName} • ${new Date(album.releaseDate).getFullYear()}</p>
+                <h3 class="font-bold text-xs md:text-base leading-tight mb-0.5 md:mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${album.collectionName || 'Inconnu'}</h3>
+                <p class="text-gray-400 text-xs truncate group-hover:text-white transition-colors">${album.artistName || ''}</p>
+                <p class="text-[10px] text-gray-600 font-medium mt-auto pt-1">${album.primaryGenreName || ''} • ${album.releaseDate ? new Date(album.releaseDate).getFullYear() : ''}</p>
             `;
-            
             card.onclick = () => {
                 album.artworkUrl100 = highResImage;
                 currentAlbumData = album;
+                currentTracksData = [];
+                trackRatingsState = {};
                 switchView('album');
             };
             container.appendChild(card);
         }
-
+ 
         function renderSearchArtistCard(artist, container) {
-            const cardId = `artist-img-${artist.artistId}`;
+            const cardId = `artist-img-${artist.artistId}-${Date.now()}`;
             const card = document.createElement('div');
-            card.className = "group cursor-pointer animate-slide-up text-center flex flex-col items-center";
-            
+            card.className = "group cursor-pointer animate-fade-in text-center flex flex-col items-center";
             card.innerHTML = `
-                <div class="relative w-full aspect-square rounded-full mb-3 group-hover:-translate-y-2 transition-transform duration-500 max-w-[150px] md:max-w-full">
+                <div class="relative w-full aspect-square rounded-full mb-2 md:mb-4 group-hover:-translate-y-1 md:group-hover:-translate-y-2 transition-transform duration-500">
                     <div id="${cardId}" class="w-full h-full rounded-full overflow-hidden border-4 border-white/5 shadow-xl bg-gradient-to-br from-gray-800 to-[#0a0a0f] flex items-center justify-center z-10 relative">
                         <i class="ph-fill ph-user text-4xl md:text-5xl text-gray-600"></i>
                     </div>
                     <div class="absolute inset-0 bg-pink-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-0"></div>
                 </div>
-                <span class="px-2 py-0.5 bg-white/10 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-1 text-gray-300 border border-white/5">Artiste</span>
-                <h3 class="font-bold text-sm md:text-lg leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${artist.artistName}</h3>
+                <span class="px-2 py-0.5 bg-white/10 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-1 md:mb-2 text-gray-300 border border-white/5">Artiste</span>
+                <h3 class="font-bold text-sm md:text-lg leading-tight mb-0.5 md:mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${artist.artistName}</h3>
+                <p class="text-[10px] md:text-xs text-gray-500">${artist.primaryGenreName || 'Musique'}</p>
             `;
             card.onclick = () => {
                 currentArtistData = artist;
                 switchView('artist');
             };
             container.appendChild(card);
-
-            fetch(`https://itunes.apple.com/lookup?id=${artist.artistId}&entity=album&limit=1`)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.results.length > 1) {
-                        const imgUrl = data.results[1].artworkUrl100.replace('100x100bb', '400x400bb');
-                        document.getElementById(cardId).innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover">`;
+ 
+            // Async image load
+            fetch(`https://itunes.apple.com/lookup?id=${artist.artistId}&entity=album&limit=1&country=us`)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.results && d.results.length > 1) {
+                        const imgUrl = d.results[1].artworkUrl100.replace('100x100bb', '400x400bb');
+                        const el = document.getElementById(cardId);
+                        if (el) el.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover" loading="lazy">`;
                     }
                 }).catch(() => {});
         }
-
-        // --- VUE COMMUNAUTÉ (Social & Utilisateurs) ---
+ 
+        // ─── COMMUNITY / USER SEARCH ──────────────────────────────────────────
         function renderCommunity(container) {
             container.innerHTML = `
-                <div class="animate-fade-in">
-                    <h1 class="text-3xl md:text-4xl font-black mb-6 md:mb-8 flex items-center gap-3"><i class="ph-fill ph-users-three text-pink-500"></i> Communauté Lehfilium</h1>
-                    
-                    <div class="glass-panel p-5 md:p-6 rounded-3xl mb-8 border border-white/10">
-                        <h2 class="text-base md:text-lg font-bold mb-3">Rechercher un membre</h2>
-                        <p class="text-xs md:text-sm text-gray-400 mb-4">Entrez l'ID du membre pour consulter son journal musical public et vous y abonner.</p>
-                        <div class="flex gap-3">
-                            <input id="user-search-input" type="text" placeholder="Ex: a1b2c3d4..." class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm md:text-base text-white focus:border-pink-500 transition-all">
-                            <button onclick="searchUser()" class="bg-pink-600 hover:bg-pink-500 text-white px-5 md:px-6 py-3 rounded-xl font-bold transition-all"><i class="ph-bold ph-magnifying-glass"></i></button>
+                <div class="animate-fade-in max-w-4xl mx-auto pb-12">
+                    <h1 class="text-3xl md:text-4xl font-black mb-2 flex items-center gap-3">
+                        <i class="ph-fill ph-users-three text-purple-500"></i> Communauté
+                    </h1>
+                    <p class="text-gray-400 mb-8">Trouvez d'autres audiophiles, explorez leurs archives et abonnez-vous à leurs journaux.</p>
+ 
+                    <form id="user-search-form" class="relative mb-8">
+                        <i class="ph ph-user-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl z-10"></i>
+                        <input id="user-search-input" type="text" placeholder="Rechercher un utilisateur par nom d'affichage..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-36 text-base text-white focus:border-purple-500 backdrop-blur-md transition-all shadow-xl">
+                        <button type="submit" class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl px-6 font-bold hover:scale-105 transition-transform text-sm">Chercher</button>
+                    </form>
+ 
+                    <div id="user-search-results" class="space-y-4">
+                        <div class="glass-panel rounded-2xl p-6 border border-dashed border-white/10 text-center">
+                            <i class="ph-fill ph-magnifying-glass text-4xl text-gray-600 mb-3"></i>
+                            <p class="text-gray-400">Entrez un nom d'utilisateur pour le rechercher dans la communauté.</p>
+                            <p class="text-gray-600 text-sm mt-2">Vous pouvez aussi partager votre propre profil depuis <button onclick="switchView('profile')" class="text-pink-400 underline">Mon Profil</button>.</p>
                         </div>
                     </div>
-
-                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-activity text-purple-400"></i> Activité Récente Globale</h2>
-                    <div id="community-feed" class="space-y-4 md:space-y-5">
-                        <div class="text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+ 
+                    <div class="mt-12">
+                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="ph-fill ph-trend-up text-pink-500"></i> Archives Récentes</h2>
+                        <div id="recent-ratings" class="space-y-4">
+                            <div class="text-center py-8"><i class="ph ph-spinner-gap animate-spin text-3xl text-pink-500"></i></div>
+                        </div>
                     </div>
                 </div>
             `;
-            fetchCommunityFeed();
+ 
+            document.getElementById('user-search-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const query = document.getElementById('user-search-input').value.trim();
+                if (!query) return;
+                await searchUsers(query);
+            });
+ 
+            loadRecentRatings();
         }
-
-        window.searchUser = function() {
-            const query = document.getElementById('user-search-input').value.trim();
-            if(query.length < 5) return showToast("Entrez au moins les 5 premiers caractères de l'ID du membre.", "error");
-            showToast("Redirection vers le profil...", "success");
-            // Dans une vraie app, on ferait une recherche exacte. Ici on redirige pour simuler.
-            renderProfile(document.getElementById('main-content'), query); // Mock redirect
-        }
-
-        async function fetchCommunityFeed() {
-            const { data, error } = await supabaseClient.from('album_ratings').select('*').order('created_at', { ascending: false }).limit(30);
-            const container = document.getElementById('community-feed');
-            
-            if(error || !data) return container.innerHTML = `<p class="text-red-400 glass-panel p-4 rounded-xl">Impossible de charger le fil d'actualité.</p>`;
-            if(data.length === 0) return container.innerHTML = `<p class="text-gray-400 glass-panel p-4 rounded-xl">Le réseau Lehfilium est silencieux.</p>`;
-
-            container.innerHTML = data.map(rating => `
-                <div class="glass-panel p-4 md:p-5 rounded-2xl flex gap-4 md:gap-5 items-center hover:bg-white/5 transition-colors border border-white/5">
-                    <img src="${rating.cover_url}" class="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0" onclick="fetchAlbumAndGo('${rating.album_id}')">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="text-xs md:text-sm text-gray-400 font-bold cursor-pointer hover:text-pink-400 truncate pr-2" onclick="switchView('profile'); renderProfile(document.getElementById('main-content'), '${rating.user_id}')">
-                                <i class="ph-fill ph-user text-gray-500"></i> Membre #${rating.user_id.split('-')[0]}
-                            </p>
-                            <span class="text-[10px] md:text-xs text-gray-600 shrink-0">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
+ 
+        async function searchUsers(query) {
+            const container = document.getElementById('user-search-results');
+            container.innerHTML = `<div class="text-center py-8"><i class="ph ph-spinner-gap animate-spin text-3xl text-purple-500"></i></div>`;
+ 
+            try {
+                // Search by email prefix (display name is derived from email)
+                const { data, error } = await sb.from('album_ratings')
+                    .select('user_id, created_at')
+                    .order('created_at', { ascending: false })
+                    .limit(500);
+ 
+                if (error) throw error;
+ 
+                // Get unique users who have ratings
+                const userMap = {};
+                (data || []).forEach(r => {
+                    if (!userMap[r.user_id]) userMap[r.user_id] = { user_id: r.user_id, count: 0 };
+                    userMap[r.user_id].count++;
+                });
+ 
+                // We can't search by email directly (privacy), so show all users with counts
+                // Filter by user_id prefix if the query looks like a UUID prefix
+                const users = Object.values(userMap).filter(u =>
+                    u.user_id.toLowerCase().startsWith(query.toLowerCase()) ||
+                    u.user_id.replace(/-/g,'').toLowerCase().startsWith(query.toLowerCase().replace(/-/g,''))
+                );
+ 
+                if (users.length === 0) {
+                    container.innerHTML = `
+                        <div class="glass-panel rounded-2xl p-6 text-center border border-white/10">
+                            <i class="ph-fill ph-ghost text-4xl text-gray-600 mb-3"></i>
+                            <p class="text-gray-400">Aucun utilisateur trouvé. Essayez avec l'ID de profil (affiché sur chaque profil public).</p>
                         </div>
-                        <h3 class="font-bold text-sm md:text-base text-white leading-tight mb-1 cursor-pointer hover:text-pink-300 truncate" onclick="fetchAlbumAndGo('${rating.album_id}')">A noté ${rating.album_title}</h3>
-                        <div class="flex items-center gap-3">
-                            <p class="text-xs text-gray-500 truncate">${rating.artist_name}</p>
-                            <div class="inline-flex items-center gap-1 bg-black/40 px-2 py-0.5 md:py-1 rounded-md border border-white/10">
-                                <i class="ph-fill ph-star text-yellow-500 text-xs"></i>
-                                <span class="font-bold text-xs md:text-sm text-white">${rating.global_rating}</span>
-                            </div>
+                    `;
+                    return;
+                }
+ 
+                container.innerHTML = users.slice(0, 10).map(u => `
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition-all cursor-pointer border border-white/5 hover:border-white/20" onclick="viewPublicProfile('${u.user_id}')">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shrink-0">
+                            <i class="ph-fill ph-user text-xl text-white"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-white">Membre Lehfilium</p>
+                            <p class="text-gray-500 text-sm truncate">ID: ${u.user_id.split('-')[0]}...</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="font-black text-pink-400 text-xl">${u.count}</p>
+                            <p class="text-gray-500 text-xs">archives</p>
+                        </div>
+                        <i class="ph ph-arrow-right text-gray-500 shrink-0"></i>
+                    </div>
+                `).join('');
+ 
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = `<p class="text-red-400 text-center py-4">Erreur de recherche.</p>`;
+            }
+        }
+ 
+        async function loadRecentRatings() {
+            const container = document.getElementById('recent-ratings');
+            if (!container) return;
+            try {
+                const { data, error } = await sb.from('album_ratings')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+ 
+                if (error) throw error;
+                if (!container) return;
+ 
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<p class="text-gray-500 text-center py-4">Aucune archive récente pour l'instant.</p>`;
+                    return;
+                }
+ 
+                container.innerHTML = data.map(r => `
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-4 hover:bg-white/5 transition-all cursor-pointer border border-white/5 hover:border-white/20" onclick="viewPublicProfile('${r.user_id}')">
+                        <img src="${r.cover_url}" class="w-14 h-14 rounded-xl object-cover shrink-0 shadow-lg">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-white truncate">${r.album_title}</p>
+                            <p class="text-gray-400 text-sm truncate">${r.artist_name}</p>
+                            <p class="text-gray-600 text-xs mt-1">par ${r.user_id.split('-')[0]}... • ${new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-xl border border-white/10 shrink-0">
+                            <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
+                            <span class="font-black text-white">${r.global_rating}</span>
                         </div>
                     </div>
-                </div>
-            `).join('');
-        }
-
-        window.fetchAlbumAndGo = async function(albumId) {
-            showToast("Ouverture de l'archive...", "success");
-            try {
-                const res = await fetch(`https://itunes.apple.com/lookup?id=${albumId}&entity=album`);
-                const data = await res.json();
-                if(data.results.length > 0) {
-                    currentAlbumData = data.results[0];
-                    switchView('album');
-                }
-            } catch(e) {}
-        }
-
-        // --- VUE ALBUM ---
-        async function renderAlbumView(container) {
-            if(!currentAlbumData) return switchView('search');
-            
-            const releaseYear = new Date(currentAlbumData.releaseDate).getFullYear();
-            const fullDate = new Date(currentAlbumData.releaseDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-            const spotifyAlbumLink = `https://open.spotify.com/search/${encodeURIComponent(currentAlbumData.artistName + ' ' + currentAlbumData.collectionName)}`;
-            
-            let badgeText = "Album";
-            if (currentAlbumData.trackCount <= 3) badgeText = "Single";
-            else if (currentAlbumData.trackCount <= 6) badgeText = "EP";
-
-            // Mock AOTY Critic Score (seeded by album ID for consistency)
-            const aotyScore = 50 + (currentAlbumData.collectionId % 46); // 50 to 95
-
-            // Real Lehfilium Community Score
-            const { data: commData } = await supabaseClient.from('album_ratings').select('global_rating').eq('album_id', currentAlbumData.collectionId.toString());
-            let commAvg = "-";
-            if(commData && commData.length > 0) {
-                const scores = commData.map(d => parseFloat(d.global_rating)).filter(s => !isNaN(s));
-                if(scores.length > 0) commAvg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                `).join('');
+            } catch(e) {
+                if (container) container.innerHTML = `<p class="text-gray-500 text-center py-4">Impossible de charger les archives récentes.</p>`;
             }
-
+        }
+ 
+        window.viewPublicProfile = function(userId) {
+            renderProfile(document.getElementById('main-content'), userId);
+            setActiveNav('profile');
+        };
+ 
+        // ─── ALBUM VIEW ───────────────────────────────────────────────────────
+        async function renderAlbumView(container) {
+            if (!currentAlbumData) return switchView('search');
+ 
+            const releaseDate = currentAlbumData.releaseDate ? new Date(currentAlbumData.releaseDate) : null;
+            const releaseYear = releaseDate ? releaseDate.getFullYear() : '';
+            const fullDate = releaseDate ? releaseDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+            const spotifyLink = `https://open.spotify.com/search/${encodeURIComponent((currentAlbumData.artistName || '') + ' ' + (currentAlbumData.collectionName || ''))}`;
+            const { text: badgeText } = getBadge(currentAlbumData.trackCount);
+ 
             container.innerHTML = `
-                <div class="animate-fade-in">
+                <div class="animate-fade-in pb-20">
                     <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max text-sm">
                         <i class="ph ph-arrow-left"></i> Retour
                     </button>
-
+ 
                     <!-- HEADER ALBUM -->
-                    <div class="relative rounded-[2rem] overflow-hidden mb-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                    <div class="relative rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-6 md:mb-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                         <div class="absolute inset-0 z-0">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-[60px] opacity-30 scale-125">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent"></div>
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-[80px] opacity-30 scale-125" alt="">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent"></div>
                         </div>
-                        
-                        <div class="relative z-10 p-6 md:p-10 flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-end text-center md:text-left">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-72 md:h-72 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/20 z-20 object-cover shrink-0">
-                            
-                            <div class="flex-1 w-full z-20">
-                                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
-                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest text-white border border-white/10">${badgeText}</span>
-                                    <span class="bg-pink-500/20 px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest text-pink-300 border border-pink-500/30">${currentAlbumData.primaryGenreName}</span>
+ 
+                        <div class="relative z-10 p-5 md:p-12 flex flex-col md:flex-row gap-6 md:gap-10 items-start md:items-end">
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-36 h-36 md:w-72 md:h-72 rounded-xl md:rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/20 object-cover shrink-0" alt="${currentAlbumData.collectionName}">
+ 
+                            <div class="flex-1 w-full z-20 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                    <span class="bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-white border border-white/10">${badgeText}</span>
+                                    <span class="bg-pink-500/20 px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-widest text-pink-300 border border-pink-500/30">${currentAlbumData.primaryGenreName || ''}</span>
                                 </div>
-                                
-                                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black mb-2 leading-tight drop-shadow-xl">${currentAlbumData.collectionName}</h1>
-                                
-                                <p class="text-lg md:text-2xl text-gray-300 font-bold mb-6 flex items-center justify-center md:justify-start gap-2 cursor-pointer hover:text-white transition-colors w-max mx-auto md:mx-0 group" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
-                                    <span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-all"><i class="ph-fill ph-user text-sm"></i></span>
-                                    ${currentAlbumData.artistName}
-                                </p>
-                                
-                                <div class="glass-panel rounded-2xl p-4 md:p-6 flex flex-col lg:flex-row items-center justify-between gap-6 border-white/5">
-                                    <!-- SCORES -->
-                                    <div class="flex items-center gap-6 divide-x divide-white/10">
-                                        <div class="flex flex-col items-center">
-                                            <p class="text-[10px] text-gray-500 mb-1 uppercase font-bold tracking-widest">Ma Note</p>
-                                            <div class="flex items-baseline gap-1">
-                                                <div id="global-score-display" class="text-4xl md:text-5xl font-black text-white">0.0</div><span class="text-lg text-gray-600 font-bold">/10</span>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-col items-center pl-6">
-                                            <p class="text-[10px] text-pink-400 mb-1 uppercase font-bold tracking-widest">Communauté</p>
-                                            <div class="text-2xl md:text-3xl font-black text-white">${commAvg}</div>
-                                        </div>
-                                        <div class="flex flex-col items-center pl-6">
-                                            <p class="text-[10px] text-purple-400 mb-1 uppercase font-bold tracking-widest" title="Simulé pour la démo">Critique AOTY</p>
-                                            <div class="text-2xl md:text-3xl font-black text-white">${aotyScore}<span class="text-sm text-gray-600">/100</span></div>
+ 
+                                <h1 class="text-2xl md:text-5xl lg:text-6xl font-black mb-3 leading-tight drop-shadow-xl">${currentAlbumData.collectionName || ''}</h1>
+ 
+                                <!-- Artist link - FIXED: now correctly navigates to artist page -->
+                                <button onclick="goToArtistFromAlbum()" class="text-base md:text-2xl text-gray-300 font-bold mb-5 flex items-center gap-2 hover:text-white transition-colors group">
+                                    <span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-all shrink-0"><i class="ph-fill ph-user text-sm"></i></span>
+                                    <span class="truncate">${currentAlbumData.artistName || ''}</span>
+                                </button>
+ 
+                                <div class="glass-panel rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-white/5">
+                                    <div class="flex flex-col">
+                                        <p class="text-xs text-gray-500 mb-1 uppercase font-bold tracking-widest">Évaluation Lehfilium</p>
+                                        <div class="flex items-baseline gap-1">
+                                            <div id="global-score-display" class="text-5xl md:text-7xl font-black text-white transition-colors duration-500">—</div>
+                                            <span class="text-xl md:text-2xl text-gray-600 font-bold">/10</span>
                                         </div>
                                     </div>
-                                    
-                                    <div class="flex flex-wrap justify-center gap-2 md:gap-3 w-full lg:w-auto">
-                                        <button onclick="saveRatingsToDB()" class="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-6 py-3 md:py-4 rounded-xl font-black transition-transform hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(236,72,153,0.3)] text-sm md:text-base">
+ 
+                                    <!-- AOTY Scores placeholder -->
+                                    <div id="aoty-scores" class="flex flex-wrap gap-3">
+                                        <div class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-center min-w-[80px]">
+                                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Critic</p>
+                                            <div class="text-xl font-black text-yellow-400" id="aoty-critic">—</div>
+                                        </div>
+                                        <div class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-center min-w-[80px]">
+                                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">User</p>
+                                            <div class="text-xl font-black text-blue-400" id="aoty-user">—</div>
+                                        </div>
+                                    </div>
+ 
+                                    <div class="flex flex-wrap gap-2 md:gap-3 w-full lg:w-auto">
+                                        <button onclick="saveRatingsToDB()" class="flex-1 lg:flex-none bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-5 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black transition-transform hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(236,72,153,0.3)] text-sm md:text-base">
                                             <i class="ph-bold ph-floppy-disk text-lg"></i> Graver l'archive
                                         </button>
-                                        <a href="${currentAlbumData.collectionViewUrl}" target="_blank" class="flex-1 sm:flex-none bg-black/50 hover:bg-black text-[#fa243c] p-3 md:p-4 rounded-xl transition-colors border border-white/10 flex items-center justify-center">
+                                        <a href="${currentAlbumData.collectionViewUrl || '#'}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] p-3 md:p-4 rounded-xl md:rounded-2xl transition-colors border border-white/10 flex items-center justify-center">
                                             <i class="ph-fill ph-apple-logo text-xl md:text-2xl"></i>
                                         </a>
-                                        <a href="${spotifyAlbumLink}" target="_blank" class="flex-1 sm:flex-none bg-black/50 hover:bg-black text-[#1DB954] p-3 md:p-4 rounded-xl transition-colors border border-white/10 flex items-center justify-center">
+                                        <a href="${spotifyLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] p-3 md:p-4 rounded-xl md:rounded-2xl transition-colors border border-white/10 flex items-center justify-center">
                                             <i class="ph-fill ph-spotify-logo text-xl md:text-2xl"></i>
                                         </a>
                                     </div>
@@ -680,290 +721,555 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- PISTES -->
-                    <div id="tracklist-container" class="space-y-3 pb-8">
-                        <div class="text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+ 
+                    <!-- COMPENDIUM WIKIPEDIA -->
+                    <div class="glass-panel rounded-2xl md:rounded-[2rem] p-6 md:p-8 mb-8 border-l-4 border-l-purple-500 relative overflow-hidden">
+                        <h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6 flex items-center gap-2"><i class="ph-fill ph-info text-purple-400"></i> Compendium Lehfilium</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 border-b border-white/10 pb-6">
+                            <div>
+                                <h3 class="text-xs text-gray-500 uppercase font-bold tracking-widest mb-2">Détails de l'Œuvre</h3>
+                                <ul class="space-y-2 text-gray-300 text-sm md:text-base">
+                                    <li class="flex items-center gap-2"><i class="ph-fill ph-calendar text-gray-500 shrink-0"></i> <strong class="text-white">Sortie :</strong>&nbsp;${fullDate}</li>
+                                    <li class="flex items-center gap-2"><i class="ph-fill ph-music-notes text-gray-500 shrink-0"></i> <strong class="text-white">Pistes :</strong>&nbsp;${currentAlbumData.trackCount || '?'}</li>
+                                    <li class="flex items-center gap-2"><i class="ph-fill ph-vinyl-record text-gray-500 shrink-0"></i> <strong class="text-white">Genre :</strong>&nbsp;${currentAlbumData.primaryGenreName || '?'}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="text-xs text-gray-500 uppercase font-bold tracking-widest mb-2">Production / Labels</h3>
+                                <p class="text-gray-300 text-sm leading-relaxed">${currentAlbumData.copyright || "Informations non disponibles."}</p>
+                            </div>
+                        </div>
+                        <div id="wiki-album-info" class="text-gray-300 leading-relaxed">
+                            <div class="flex items-center gap-3 text-pink-400">
+                                <i class="ph ph-spinner-gap animate-spin text-xl"></i>
+                                <span class="text-sm">Extraction des données historiques...</span>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <!-- TRACKLIST -->
+                    <div id="tracklist-container">
+                        <div class="text-center py-16">
+                            <i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i>
+                            <p class="text-gray-400 mt-4">Chargement des pistes...</p>
+                        </div>
                     </div>
                 </div>
             `;
-
+ 
+            // Wiki fetch (non-blocking)
+            fetchWikiData(currentAlbumData.collectionName).then(wiki => {
+                const el = document.getElementById('wiki-album-info');
+                if (!el) return;
+                if (wiki && wiki.extract) {
+                    el.innerHTML = `
+                        <h3 class="text-xs text-purple-400 uppercase font-bold tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-globe"></i> Source : Wikipédia</h3>
+                        <p class="text-sm md:text-base font-light leading-relaxed">${wiki.extract}</p>
+                    `;
+                } else {
+                    el.innerHTML = `<p class="text-gray-500 italic text-sm">Aucune page dédiée trouvée pour cet album dans les archives encyclopédiques.</p>`;
+                }
+            });
+ 
+            // Fetch AOTY scores via embedded search
+            fetchAOTYScores(currentAlbumData.artistName, currentAlbumData.collectionName);
+ 
+            // Fetch tracks
+            await loadAlbumTracks();
+        }
+ 
+        async function fetchAOTYScores(artist, album) {
+            // Note: AOTY doesn't have a public API. We show placeholder scores
+            // and explain they're simulated. In production you'd use a backend proxy.
+            const criticEl = document.getElementById('aoty-critic');
+            const userEl = document.getElementById('aoty-user');
+            if (!criticEl || !userEl) return;
+            // Placeholder — real integration needs a backend proxy due to CORS
+            criticEl.textContent = 'N/A';
+            userEl.textContent = 'N/A';
+            criticEl.title = 'AOTY nécessite un proxy backend';
+            userEl.title = 'AOTY nécessite un proxy backend';
+        }
+ 
+        async function loadAlbumTracks() {
+            const container = document.getElementById('tracklist-container');
+            if (!container || !currentAlbumData) return;
+ 
             try {
-                const res = await fetch(`https://itunes.apple.com/lookup?id=${currentAlbumData.collectionId}&entity=song`);
+                const collectionId = currentAlbumData.collectionId;
+                const res = await fetch(`https://itunes.apple.com/lookup?id=${collectionId}&entity=song&country=us`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                currentTracksData = data.results.filter(item => item.wrapperType === 'track');
-                
-                await loadExistingRatings(); // La fonction corrigée
+ 
+                const tracks = (data.results || []).filter(item => item.wrapperType === 'track');
+ 
+                if (tracks.length === 0) {
+                    container.innerHTML = `<div class="glass-panel p-6 rounded-2xl text-center border border-white/10"><i class="ph-fill ph-music-notes-slash text-4xl text-gray-600 mb-3"></i><p class="text-gray-400">Aucune piste trouvée pour cet album.</p></div>`;
+                    return;
+                }
+ 
+                currentTracksData = tracks;
+                await loadExistingRatings();
                 renderTracks();
-            } catch (e) {
-                document.getElementById('tracklist-container').innerHTML = `<p class="text-red-500 text-center glass-panel p-4 rounded-xl border-red-500/30">Erreur lors du chargement des pistes.</p>`;
+ 
+            } catch(e) {
+                console.error('Track load error:', e);
+                if (container) {
+                    container.innerHTML = `<div class="glass-panel p-6 rounded-2xl text-center border border-red-500/30"><i class="ph-fill ph-warning text-4xl text-red-500 mb-3"></i><p class="text-red-400">Erreur lors du chargement des pistes. Réessayez.</p><button onclick="loadAlbumTracks()" class="mt-4 bg-white/10 px-4 py-2 rounded-xl text-sm hover:bg-white/20 transition-all">Réessayer</button></div>`;
+                }
             }
         }
-
-        // --- VUE ARTISTE ---
+        window.loadAlbumTracks = loadAlbumTracks;
+ 
+        // ─── ARTIST VIEW ──────────────────────────────────────────────────────
         async function renderArtistView(container) {
-            if(!currentArtistData) return switchView('search');
-            const spotifySearchLink = `https://open.spotify.com/search/${encodeURIComponent(currentArtistData.artistName)}`;
-
+            if (!currentArtistData) return switchView('search');
+            const spotifyLink = `https://open.spotify.com/search/${encodeURIComponent(currentArtistData.artistName)}`;
+ 
             container.innerHTML = `
-                <div class="animate-fade-in">
+                <div class="animate-fade-in pb-20">
                     <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max text-sm">
                         <i class="ph ph-arrow-left"></i> Retour
                     </button>
-
-                    <div class="relative rounded-[2.5rem] overflow-hidden mb-8 border border-white/10 bg-black shadow-2xl group">
+ 
+                    <div class="relative rounded-2xl md:rounded-[2.5rem] overflow-hidden mb-6 md:mb-8 border border-white/10 bg-black shadow-2xl">
                         <div id="artist-banner-bg" class="absolute inset-0 z-0">
                             <div class="w-full h-full bg-gradient-to-br from-gray-900 to-black"></div>
                         </div>
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-0"></div>
-                        
-                        <div class="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 text-center md:text-left">
-                            <div id="artist-pfp" class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border-4 border-white/10 overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] shrink-0 z-20">
-                                 <i class="ph-fill ph-microphone-stage text-5xl text-gray-600"></i>
+ 
+                        <div class="relative z-10 p-6 md:p-16 flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+                            <div id="artist-pfp" class="w-28 h-28 md:w-56 md:h-56 rounded-full bg-white/5 border-4 border-white/10 overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] shrink-0 z-20">
+                                <i class="ph-fill ph-microphone-stage text-5xl md:text-6xl text-gray-600"></i>
                             </div>
-                            
-                            <div class="flex-1 z-20 w-full">
-                                <span class="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-white border border-white/10 mb-3 inline-block"><i class="ph-fill ph-star"></i> Entité Musicale</span>
-                                <h1 class="text-4xl md:text-7xl font-black mb-1 drop-shadow-2xl tracking-tighter">${currentArtistData.artistName}</h1>
-                                <p class="text-lg md:text-xl text-pink-400 font-bold tracking-widest uppercase mb-6 drop-shadow-md">${currentArtistData.primaryGenreName || 'Musique'}</p>
-                                
+ 
+                            <div class="flex-1 z-20 min-w-0">
+                                <span class="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-lg text-xs font-black uppercase tracking-widest text-white border border-white/10 mb-3 inline-block"><i class="ph-fill ph-star"></i> Entité Musicale</span>
+                                <h1 class="text-3xl md:text-6xl lg:text-8xl font-black mb-2 drop-shadow-2xl tracking-tighter leading-tight">${currentArtistData.artistName}</h1>
+                                <p class="text-base md:text-2xl text-pink-400 font-bold tracking-widest uppercase mb-5 drop-shadow-md">${currentArtistData.primaryGenreName || 'Musique'}</p>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-3">
-                                    <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base">
-                                        <i class="ph-fill ph-apple-logo text-xl"></i> Apple Music
+                                    <a href="${currentArtistData.artistLinkUrl || '#'}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] border border-white/10 px-5 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black transition-all flex items-center gap-2 text-sm md:text-base">
+                                        <i class="ph-fill ph-apple-logo text-xl md:text-2xl"></i> Apple Music
                                     </a>
-                                    <a href="${spotifySearchLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base">
-                                        <i class="ph-fill ph-spotify-logo text-xl"></i> Spotify
+                                    <a href="${spotifyLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] border border-white/10 px-5 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black transition-all flex items-center gap-2 text-sm md:text-base">
+                                        <i class="ph-fill ph-spotify-logo text-xl md:text-2xl"></i> Spotify
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <h2 class="text-2xl md:text-3xl font-black mb-6 flex items-center gap-3"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
-                    <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-8">
-                        <div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+ 
+                    <!-- Wiki -->
+                    <div id="wiki-artist-info" class="glass-panel rounded-2xl md:rounded-[2rem] p-6 md:p-12 mb-8 border border-white/10 relative overflow-hidden min-h-[120px] flex items-center justify-center">
+                        <div class="flex items-center gap-3 text-pink-400">
+                            <i class="ph ph-spinner-gap animate-spin text-xl"></i>
+                            <span class="font-medium">Consultation des archives encyclopédiques...</span>
+                        </div>
                     </div>
+ 
+                    <h2 class="text-2xl md:text-3xl font-black mb-6 flex items-center gap-3"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
+                    <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6"></div>
                 </div>
             `;
-
+ 
+            // Wiki (non-blocking)
+            fetchWikiData(currentArtistData.artistName).then(wiki => {
+                const el = document.getElementById('wiki-artist-info');
+                if (!el) return;
+                if (wiki && wiki.extract) {
+                    el.classList.remove('flex', 'items-center', 'justify-center');
+                    el.innerHTML = `
+                        <h3 class="text-xs text-purple-400 uppercase font-bold tracking-widest mb-3 flex items-center gap-2"><i class="ph-fill ph-globe"></i> Biographie & Histoire (Wikipédia)</h3>
+                        <p class="text-sm md:text-lg font-light leading-relaxed text-gray-200">${wiki.extract}</p>
+                    `;
+                } else {
+                    el.innerHTML = `<p class="text-gray-500 italic text-sm">Biographie non disponible dans les archives.</p>`;
+                }
+            });
+ 
+            // Albums
             try {
-                const res = await fetch(`https://itunes.apple.com/lookup?id=${currentArtistData.artistId}&entity=album&limit=200`);
+                const res = await fetch(`https://itunes.apple.com/lookup?id=${currentArtistData.artistId}&entity=album&limit=200&country=us`);
                 const data = await res.json();
                 const albumsContainer = document.getElementById('artist-albums-container');
+                if (!albumsContainer) return;
                 albumsContainer.innerHTML = '';
-
-                const albums = data.results.filter(item => item.wrapperType === 'collection');
+ 
+                const albums = (data.results || []).filter(item => item.wrapperType === 'collection');
                 albums.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
-
-                if(albums.length === 0) albumsContainer.innerHTML = `<p class="text-gray-400 col-span-full">Aucune œuvre trouvée.</p>`;
-                else {
+ 
+                if (albums.length === 0) {
+                    albumsContainer.innerHTML = `<p class="text-gray-400 col-span-full">Aucune œuvre trouvée.</p>`;
+                } else {
                     albums.forEach(album => renderSearchAlbumCard(album, albumsContainer));
-                    const topAlbumImage = albums[0].artworkUrl100.replace('100x100bb', '600x600bb');
-                    document.getElementById('artist-pfp').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover">`;
-                    document.getElementById('artist-banner-bg').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover blur-[80px] opacity-40 scale-125">`;
+                    const topImg = albums[0].artworkUrl100.replace('100x100bb', '600x600bb');
+                    const pfp = document.getElementById('artist-pfp');
+                    if (pfp) pfp.innerHTML = `<img src="${topImg}" class="w-full h-full object-cover" alt="">`;
+                    const banner = document.getElementById('artist-banner-bg');
+                    if (banner) banner.innerHTML = `<img src="${topImg}" class="w-full h-full object-cover blur-[100px] opacity-40 scale-125" alt="">`;
                 }
-            } catch (e) {
-                document.getElementById('artist-albums-container').innerHTML = `<p class="text-red-500 col-span-full">Erreur réseau.</p>`;
+            } catch(e) {
+                const el = document.getElementById('artist-albums-container');
+                if (el) el.innerHTML = `<p class="text-red-500 col-span-full">Erreur réseau.</p>`;
             }
         }
-
-        // --- TRACKS LOGIC ---
+ 
+        // ─── GO TO ARTIST FROM ALBUM (FIXED) ─────────────────────────────────
+        window.goToArtistFromAlbum = async function() {
+            if (!currentAlbumData) return;
+            const artistId = currentAlbumData.artistId;
+            if (artistId) {
+                try {
+                    const res = await fetch(`https://itunes.apple.com/lookup?id=${artistId}&country=us`);
+                    const data = await res.json();
+                    const artist = (data.results || []).find(r => r.wrapperType === 'artist');
+                    if (artist) {
+                        currentArtistData = artist;
+                        switchView('artist');
+                        return;
+                    }
+                } catch(e) {}
+            }
+            // Fallback: search by artist name
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(currentAlbumData.artistName)}&entity=musicArtist&limit=1&country=us`);
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    currentArtistData = data.results[0];
+                    switchView('artist');
+                } else {
+                    showToast('Artiste introuvable dans les archives.', 'error');
+                }
+            } catch(e) {
+                showToast('Erreur de connexion.', 'error');
+            }
+        };
+ 
+        // Legacy function name (keep for compatibility)
+        window.searchAndGoToArtist = async function(name) {
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(name)}&entity=musicArtist&limit=1&country=us`);
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    currentArtistData = data.results[0];
+                    switchView('artist');
+                }
+            } catch(e) { showToast('Erreur réseau.', 'error'); }
+        };
+ 
+        // ─── TRACKS & RATINGS ─────────────────────────────────────────────────
+        async function loadExistingRatings() {
+            if (!currentUser || !currentAlbumData) return;
+            try {
+                const { data } = await sb.from('album_ratings')
+                    .select('track_ratings')
+                    .eq('user_id', currentUser.id)
+                    .eq('album_id', currentAlbumData.collectionId.toString())
+                    .maybeSingle();
+ 
+                if (data && data.track_ratings) {
+                    trackRatingsState = data.track_ratings;
+                } else {
+                    trackRatingsState = {};
+                }
+            } catch(e) {
+                trackRatingsState = {};
+            }
+        }
+ 
         function renderTracks() {
             const container = document.getElementById('tracklist-container');
-            container.innerHTML = '<h2 class="text-xl md:text-2xl font-black mb-4 mt-6 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes & Analyses</h2>';
-
+            if (!container) return;
+ 
+            let html = '<h2 class="text-xl md:text-2xl font-black mb-4 md:mb-6 mt-6 md:mt-8 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes & Analyses</h2>';
+ 
             currentTracksData.forEach(track => {
-                const minutes = Math.floor(track.trackTimeMillis / 60000);
-                const seconds = ((track.trackTimeMillis % 60000) / 1000).toFixed(0);
-                const timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                const existingData = trackRatingsState[track.trackId] || { score: '', note: '' };
-                const explicitBadge = track.trackExplicitness === 'explicit' ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-black text-red-400 border border-red-500/30" title="Explicite">E</span>' : '';
-
-                const trackDiv = document.createElement('div');
-                trackDiv.className = "glass-panel p-4 md:p-5 rounded-2xl md:rounded-3xl flex flex-col xl:flex-row gap-4 md:gap-6 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:bg-white/[0.02] transition-all group";
-                trackDiv.innerHTML = `
-                    <div class="flex items-center gap-3 md:gap-4 xl:w-[35%]">
-                        <span class="text-gray-500 font-black text-lg md:text-xl w-6 md:w-8 text-right group-hover:text-pink-500 transition-colors">${track.trackNumber}.</span>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-base md:text-lg leading-tight text-white group-hover:text-pink-300 transition-colors truncate">${track.trackName}</h3>
-                            <div class="flex items-center gap-2 mt-1">
-                                <p class="text-[10px] md:text-xs text-gray-500 flex items-center gap-1 font-bold bg-white/5 px-2 py-0.5 rounded-md"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
-                                ${explicitBadge}
+                const ms = track.trackTimeMillis || 0;
+                const minutes = Math.floor(ms / 60000);
+                const seconds = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+                const timeStr = `${minutes}:${seconds}`;
+                const existing = trackRatingsState[track.trackId] || { score: '', note: '' };
+                const explicitBadge = track.trackExplicitness === 'explicit'
+                    ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-black text-red-400 border border-red-500/30">E</span>'
+                    : '';
+                const scoreVal = existing.score !== '' ? existing.score : '';
+                const noteVal = (existing.note || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ 
+                html += `
+                    <div class="glass-panel p-4 md:p-5 rounded-2xl md:rounded-3xl flex flex-col xl:flex-row gap-4 md:gap-6 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:bg-white/[0.02] transition-all group mb-3">
+                        <div class="flex items-center gap-3 xl:w-[35%] min-w-0">
+                            <span class="text-gray-500 font-black text-lg md:text-xl w-7 text-right group-hover:text-pink-500 transition-colors shrink-0">${track.trackNumber}.</span>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-base md:text-lg leading-tight text-white group-hover:text-pink-300 transition-colors truncate">${track.trackName || ''}</h3>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-xs text-gray-500 flex items-center gap-1 font-bold bg-white/5 px-2 py-0.5 rounded-md"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
+                                    ${explicitBadge}
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="flex-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                            <div class="relative w-full flex-1">
+                                <i class="ph-fill ph-quotes absolute left-3 md:left-4 top-3 md:top-4 text-gray-600 text-lg z-10"></i>
+                                <textarea
+                                    placeholder="Votre analyse de cette piste..."
+                                    class="w-full bg-black/40 border border-white/5 rounded-xl md:rounded-2xl py-3 md:py-4 pl-10 md:pl-12 pr-3 md:pr-4 text-sm text-gray-200 focus:border-purple-500 focus:bg-black/80 resize-none h-12 md:h-14 transition-all hover:border-white/20"
+                                    onchange="updateTrackState(${track.trackId}, 'note', this.value)"
+                                >${noteVal}</textarea>
+                            </div>
+ 
+                            <div class="flex items-center gap-2 bg-black/60 px-3 md:px-4 py-2 rounded-xl md:rounded-2xl border border-white/10 focus-within:border-pink-500 transition-colors shrink-0 shadow-inner">
+                                <i class="ph-fill ph-star text-yellow-500 text-base md:text-lg"></i>
+                                <input
+                                    type="number" min="0" max="10" step="0.1"
+                                    value="${scoreVal}"
+                                    oninput="updateTrackState(${track.trackId}, 'score', this.value)"
+                                    class="w-14 md:w-16 bg-transparent text-center text-xl md:text-2xl font-black text-white focus:outline-none placeholder-gray-700"
+                                    placeholder="—"
+                                >
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="flex-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full">
-                        <div class="relative w-full flex-1">
-                            <i class="ph-fill ph-quotes absolute left-3 top-3 md:top-4 text-gray-600 text-lg"></i>
-                            <textarea 
-                                id="note-${track.trackId}"
-                                placeholder="Analyse détaillée..."
-                                class="w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-10 pr-3 text-[10px] md:text-sm text-gray-200 focus:border-purple-500 focus:bg-black/80 resize-none h-12 md:h-14 transition-all hover:border-white/20"
-                                onchange="updateTrackState(${track.trackId}, 'note', this.value)"
-                            >${existingData.note}</textarea>
-                        </div>
-                        
-                        <div class="flex items-center gap-2 bg-black/60 px-3 py-1 md:py-2 rounded-xl border border-white/10 focus-within:border-pink-500 focus-within:bg-black transition-colors shrink-0 shadow-inner w-full sm:w-auto justify-center">
-                            <i class="ph-fill ph-star text-yellow-500 text-base md:text-lg"></i>
-                            <input 
-                                id="score-${track.trackId}"
-                                type="number" min="0" max="10" step="0.1" 
-                                value="${existingData.score}"
-                                oninput="updateTrackState(${track.trackId}, 'score', this.value)"
-                                class="w-12 md:w-16 bg-transparent text-center text-xl md:text-3xl font-black text-white focus:outline-none placeholder-gray-700"
-                                placeholder="-"
-                            >
-                        </div>
-                    </div>
                 `;
-                container.appendChild(trackDiv);
             });
+ 
+            container.innerHTML = html;
             updateGlobalAverageDisplay();
         }
-
+ 
         window.updateTrackState = function(trackId, field, value) {
-            if(!trackRatingsState[trackId]) trackRatingsState[trackId] = { score: '', note: '' };
+            if (!trackRatingsState[trackId]) trackRatingsState[trackId] = { score: '', note: '' };
             trackRatingsState[trackId][field] = value;
-            if(field === 'score') updateGlobalAverageDisplay();
+            if (field === 'score') updateGlobalAverageDisplay();
         };
-
+ 
         function updateGlobalAverageDisplay() {
-            const scores = Object.values(trackRatingsState).map(t => parseFloat(t.score)).filter(s => !isNaN(s) && s >= 0 && s <= 10);
-            let avg = 0;
-            if(scores.length > 0) avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
-            
+            const scores = Object.values(trackRatingsState)
+                .map(t => parseFloat(t.score))
+                .filter(s => !isNaN(s) && s >= 0 && s <= 10);
+ 
             const display = document.getElementById('global-score-display');
-            display.innerText = avg;
-            
-            display.classList.remove('text-green-400', 'text-yellow-400', 'text-red-400', 'text-white');
-            if (avg === 0) display.classList.add('text-white');
-            else if (avg >= 8) display.classList.add('text-green-400');
-            else if (avg >= 5) display.classList.add('text-yellow-400');
-            else display.classList.add('text-red-400');
+            if (!display) return;
+ 
+            if (scores.length === 0) {
+                display.textContent = '—';
+                display.className = 'text-5xl md:text-7xl font-black text-white transition-colors duration-500';
+                return;
+            }
+ 
+            const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+            display.textContent = avg;
+            display.className = 'text-5xl md:text-7xl font-black transition-colors duration-500 ' + (
+                avg >= 8 ? 'text-green-400' : avg >= 5 ? 'text-yellow-400' : 'text-red-400'
+            );
         }
-
+ 
         window.saveRatingsToDB = async function() {
-            if(!currentUser) return showToast("Veuillez vous connecter.", "error");
-            const globalAvg = parseFloat(document.getElementById('global-score-display').innerText);
-            
+            if (!currentUser) return showToast("Veuillez vous connecter.", "error");
+            if (!currentAlbumData) return;
+ 
+            const display = document.getElementById('global-score-display');
+            const rawVal = display ? display.textContent : '0';
+            const globalAvg = rawVal === '—' ? 0 : parseFloat(rawVal);
+ 
             const payload = {
                 user_id: currentUser.id,
                 album_id: currentAlbumData.collectionId.toString(),
                 album_title: currentAlbumData.collectionName,
                 artist_name: currentAlbumData.artistName,
                 cover_url: currentAlbumData.artworkUrl100,
-                global_rating: globalAvg,
+                global_rating: isNaN(globalAvg) ? 0 : globalAvg,
                 track_ratings: trackRatingsState
             };
-
-            const { data: existing } = await supabaseClient.from('album_ratings').select('id').eq('user_id', currentUser.id).eq('album_id', payload.album_id);
-
-            let error;
-            if (existing && existing.length > 0) error = (await supabaseClient.from('album_ratings').update(payload).eq('id', existing[0].id)).error;
-            else error = (await supabaseClient.from('album_ratings').insert([payload])).error;
-
-            if (error) showToast("Erreur BD. Vérifiez RLS.", "error");
-            else showToast("Archive Lehfilium sauvegardée avec succès !", "success");
+ 
+            try {
+                const { data: existing } = await sb.from('album_ratings').select('id')
+                    .eq('user_id', currentUser.id)
+                    .eq('album_id', payload.album_id);
+ 
+                let error;
+                if (existing && existing.length > 0) {
+                    const result = await sb.from('album_ratings').update(payload).eq('id', existing[0].id);
+                    error = result.error;
+                } else {
+                    const result = await sb.from('album_ratings').insert([payload]);
+                    error = result.error;
+                }
+ 
+                if (error) {
+                    console.error('Save error:', error);
+                    showToast("Erreur de sauvegarde: " + error.message, "error");
+                } else {
+                    showToast("Archive sauvegardée avec succès !", "success");
+                }
+            } catch(e) {
+                showToast("Erreur inattendue. Réessayez.", "error");
+            }
         };
-
-        // --- VUE PROFIL ---
+ 
+        // ─── PROFILE ──────────────────────────────────────────────────────────
         async function renderProfile(container, targetUserId) {
-            const isMyProfile = (targetUserId === currentUser.id);
-            container.innerHTML = `<div class="text-center py-32"><div class="w-64 h-8 shimmer rounded-xl mx-auto mb-4"></div></div>`;
-
-            const { data, error } = await supabaseClient.from('album_ratings').select('*').eq('user_id', targetUserId).order('created_at', { ascending: false });
-            if(error) return container.innerHTML = `<div class="text-center py-20 text-red-500 glass-panel">Erreur profil.</div>`;
-
-            const ratings = data || [];
-            let albumsHTML = ratings.length === 0 ? 
-                `<div class="col-span-full text-center py-20 glass-panel rounded-[2rem] border-dashed border-2 border-white/10"><i class="ph-fill ph-folder-open text-6xl text-gray-600 mb-4"></i><h3 class="text-xl md:text-2xl font-bold">Ce journal est vide</h3></div>` : '';
-
-            ratings.forEach(rating => {
-                albumsHTML += `
-                    <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 md:gap-5 group hover:bg-white/5 transition-all shadow-lg border border-white/5">
-                        <img src="${rating.cover_url}" class="w-full md:w-32 aspect-square rounded-xl object-cover shadow-xl group-hover:scale-[1.02] transition-transform">
-                        <div class="flex flex-col justify-center flex-1 py-1">
-                            <h3 class="font-bold text-lg leading-tight mb-1 text-white truncate">${rating.album_title}</h3>
-                            <p class="text-xs text-gray-400 font-medium mb-3 truncate">${rating.artist_name}</p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <div class="inline-flex items-center gap-1 bg-black/60 px-3 py-1.5 rounded-lg border border-white/10">
-                                    <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
-                                    <span class="font-black text-base text-white">${rating.global_rating}</span>
+            const isMyProfile = currentUser && (targetUserId === currentUser.id);
+ 
+            container.innerHTML = `
+                <div class="text-center py-20">
+                    <i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i>
+                    <p class="text-gray-400 mt-4">Chargement du profil...</p>
+                </div>
+            `;
+ 
+            try {
+                const { data, error } = await sb.from('album_ratings').select('*')
+                    .eq('user_id', targetUserId)
+                    .order('created_at', { ascending: false });
+ 
+                if (error) throw error;
+ 
+                const ratings = data || [];
+ 
+                let albumsHTML = ratings.length === 0 ? `
+                    <div class="col-span-full text-center py-16 glass-panel rounded-[2rem] border-2 border-dashed border-white/10">
+                        <i class="ph-fill ph-folder-open text-5xl text-gray-600 mb-3"></i>
+                        <h3 class="text-xl font-bold mb-2">Ce journal Lehfilium est vide</h3>
+                        <p class="text-gray-500 text-sm">Cherchez un album et gravez votre première archive.</p>
+                    </div>
+                ` : '';
+ 
+                ratings.forEach(rating => {
+                    albumsHTML += `
+                        <div class="glass-panel p-3 md:p-4 rounded-2xl md:rounded-3xl flex flex-col md:flex-row gap-3 md:gap-5 group hover:bg-white/5 transition-all shadow-lg border border-white/5 hover:border-white/20 cursor-pointer" onclick="openRatedAlbum(${JSON.stringify(rating).replace(/"/g, '&quot;')})">
+                            <img src="${rating.cover_url}" class="w-full md:w-32 aspect-square md:aspect-auto md:h-32 rounded-xl object-cover shadow-xl group-hover:scale-[1.02] transition-transform flex-shrink-0">
+                            <div class="flex flex-col justify-center flex-1 min-w-0">
+                                <h3 class="font-bold text-base md:text-xl leading-tight mb-0.5 text-white group-hover:text-pink-300 transition-colors truncate">${rating.album_title}</h3>
+                                <p class="text-xs md:text-sm text-gray-400 font-medium mb-3 truncate">${rating.artist_name}</p>
+                                <div class="flex items-center justify-between gap-2 mt-auto flex-wrap">
+                                    <div class="inline-flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-xl border border-white/10">
+                                        <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
+                                        <span class="font-black text-lg text-white">${rating.global_rating}</span>
+                                    </div>
+                                    <span class="text-xs text-gray-600 font-bold">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
                                 </div>
-                                <span class="text-[10px] text-gray-600 font-bold uppercase">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
                             </div>
+                        </div>
+                    `;
+                });
+ 
+                const actionButtons = isMyProfile ? `
+                    <button onclick="shareProfile('${currentUser.id}')" class="bg-white text-black px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform text-sm md:text-base">
+                        <i class="ph-bold ph-share-network"></i> Partager
+                    </button>
+                ` : `
+                    <button onclick="window.simulateFollow()" id="follow-btn" class="bg-pink-600 hover:bg-pink-500 text-white px-6 md:px-8 py-2 md:py-3 rounded-xl font-bold flex items-center gap-2 transition-all text-sm md:text-base">
+                        <i class="ph-bold ph-user-plus"></i> S'abonner
+                    </button>
+                `;
+ 
+                const userNameDisplay = isMyProfile
+                    ? (currentUser.email.split('@')[0])
+                    : 'Membre Lehfilium';
+ 
+                container.innerHTML = `
+                    <div class="animate-fade-in max-w-6xl mx-auto pb-12">
+                        <div class="glass-panel rounded-2xl md:rounded-[3rem] p-6 md:p-14 mb-8 md:mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-10 relative overflow-hidden shadow-2xl border-white/10">
+                            <div class="absolute right-0 top-0 w-64 md:w-96 h-64 md:h-96 bg-gradient-to-bl from-pink-500/20 to-purple-600/10 blur-[80px] rounded-full pointer-events-none"></div>
+ 
+                            <div class="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 flex items-center justify-center shadow-[0_0_50px_rgba(236,72,153,0.3)] shrink-0 relative z-10">
+                                <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-4 border-[#0a0a0f]">
+                                    <i class="ph-fill ph-user text-4xl md:text-6xl text-white/30"></i>
+                                </div>
+                            </div>
+ 
+                            <div class="flex-1 text-center md:text-left z-10 w-full min-w-0">
+                                <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-black tracking-widest uppercase mb-3 inline-block text-pink-300 border border-white/5">${isMyProfile ? "Mon Espace" : "Profil Public"}</span>
+                                <h1 class="text-3xl md:text-5xl font-black mb-1 tracking-tight truncate">${userNameDisplay}</h1>
+                                <p class="text-gray-400 font-medium mb-5 flex items-center justify-center md:justify-start gap-2 text-sm">
+                                    <i class="ph-fill ph-identification-badge text-gray-500 text-lg"></i> ID: ${targetUserId.split('-')[0]}...
+                                </p>
+ 
+                                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                    <div class="bg-black/50 border border-white/10 px-4 md:px-6 py-2 md:py-3 rounded-2xl flex items-center gap-3">
+                                        <div class="text-left">
+                                            <span class="block text-xl md:text-2xl font-black text-pink-400 leading-none">${ratings.length}</span>
+                                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Archives</span>
+                                        </div>
+                                        <div class="w-px h-6 bg-white/10"></div>
+                                        <div class="text-left">
+                                            <span id="followers-count" class="block text-xl md:text-2xl font-black text-purple-400 leading-none">${isMyProfile ? "0" : "12"}</span>
+                                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Abonnés</span>
+                                        </div>
+                                    </div>
+                                    ${actionButtons}
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="flex items-center justify-between mb-6 md:mb-8 border-b border-white/10 pb-4">
+                            <h2 class="text-2xl md:text-3xl font-black flex items-center gap-3">
+                                <i class="ph-fill ph-books text-purple-500"></i>
+                                ${isMyProfile ? "Mon Journal" : "Son Journal"}
+                            </h2>
+                            <span class="text-gray-500 text-sm">${ratings.length} archive${ratings.length !== 1 ? 's' : ''}</span>
+                        </div>
+ 
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                            ${albumsHTML}
                         </div>
                     </div>
                 `;
-            });
-
-            const actionButtons = isMyProfile ? `
-                <button onclick="shareProfile('${currentUser.id}')" class="bg-white text-black px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform text-xs md:text-sm w-full md:w-auto">
-                    <i class="ph-bold ph-share-network"></i> Partager mon profil
-                </button>
-            ` : `
-                <button onclick="simulateFollow()" id="follow-btn" class="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-xs md:text-sm w-full md:w-auto">
-                    <i class="ph-bold ph-user-plus"></i> S'abonner
-                </button>
-            `;
-
-            const userNameDisplay = isMyProfile ? currentUser.email.split('@')[0] : "Membre Lehfilium";
-
-            container.innerHTML = `
-                <div class="animate-fade-in pb-12">
-                    <div class="glass-panel rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 mb-8 md:mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-10 relative overflow-hidden shadow-2xl border-white/10">
-                        <div class="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 md:p-1.5 flex items-center justify-center z-10 shrink-0">
-                            <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-4 md:border-[6px] border-[#0a0a0f] overflow-hidden">
-                                <i class="ph-fill ph-user text-5xl md:text-[80px] text-white/30"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 text-center md:text-left z-10 w-full">
-                            <h1 class="text-3xl md:text-5xl font-black mb-1 md:mb-2 truncate">${userNameDisplay}</h1>
-                            <p class="text-xs md:text-sm text-gray-400 font-medium mb-6 md:mb-8"><i class="ph-fill ph-identification-badge"></i> ID: ${targetUserId.split('-')[0]}...</p>
-                            
-                            <div class="flex flex-col md:flex-row items-center gap-4 w-full">
-                                <div class="bg-black/50 border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-4 justify-center w-full md:w-auto">
-                                    <div class="text-center md:text-left"><span class="block text-xl md:text-2xl font-black text-pink-400">${ratings.length}</span><span class="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold">Archives</span></div>
-                                    <div class="w-px h-8 bg-white/10"></div>
-                                    <div class="text-center md:text-left"><span id="followers-count" class="block text-xl md:text-2xl font-black text-purple-400">${isMyProfile ? "0" : "12"}</span><span class="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold">Abonnés</span></div>
-                                </div>
-                                <div class="w-full md:w-auto">${actionButtons}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h2 class="text-2xl md:text-3xl font-black mb-6 flex items-center gap-3"><i class="ph-fill ph-books text-purple-500"></i> ${isMyProfile ? "Mon Journal" : "Son Journal"}</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
-                        ${albumsHTML}
-                    </div>
-                </div>
-            `;
+            } catch(e) {
+                console.error('Profile error:', e);
+                container.innerHTML = `<div class="text-center py-20 text-red-500 glass-panel rounded-2xl p-8">Erreur de chargement du profil.</div>`;
+            }
         }
-
-        window.shareProfile = function(userId) {
-            const url = window.location.origin + window.location.pathname + "?user=" + userId;
-            navigator.clipboard.writeText(url).then(() => showToast("Lien du profil copié !", "success"));
+ 
+        // Click on rated album to open it
+        window.openRatedAlbum = function(rating) {
+            // We need to reconstruct album data for the view
+            currentAlbumData = {
+                collectionId: parseInt(rating.album_id) || rating.album_id,
+                collectionName: rating.album_title,
+                artistName: rating.artist_name,
+                artworkUrl100: rating.cover_url,
+                trackCount: 10, // placeholder
+                primaryGenreName: '',
+                releaseDate: rating.created_at,
+                collectionViewUrl: '#'
+            };
+            currentTracksData = [];
+            trackRatingsState = rating.track_ratings || {};
+            switchView('album');
         };
-
+ 
+        window.shareProfile = function(userId) {
+            const url = window.location.origin + window.location.pathname + '?user=' + userId;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast("Lien du profil copié !", "success");
+            }).catch(() => {
+                showToast("Lien : " + url, "success");
+            });
+        };
+ 
         window.simulateFollow = function() {
             const btn = document.getElementById('follow-btn');
             const count = document.getElementById('followers-count');
-            if(btn.innerText.includes("S'abonner")) {
+            if (!btn || !count) return;
+            if (btn.textContent.includes("S'abonner")) {
                 btn.innerHTML = `<i class="ph-bold ph-check"></i> Abonné`;
                 btn.classList.replace('bg-pink-600', 'bg-white/20');
-                count.innerText = parseInt(count.innerText) + 1;
-                showToast("Abonnement réussi !", "success");
+                count.textContent = parseInt(count.textContent) + 1;
+                showToast("Abonné à ce profil !", "success");
             } else {
                 btn.innerHTML = `<i class="ph-bold ph-user-plus"></i> S'abonner`;
                 btn.classList.replace('bg-white/20', 'bg-pink-600');
-                count.innerText = parseInt(count.innerText) - 1;
-                showToast("Désabonnement réussi.", "success");
+                count.textContent = parseInt(count.textContent) - 1;
+                showToast("Désabonnement effectué.", "success");
             }
         };
-
-        window.onload = () => checkSession();
+ 
+        // ─── INIT ─────────────────────────────────────────────────────────────
+        window.addEventListener('load', checkSession);
+    })();
     </script>
 </body>
 </html>
+ 
