@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lehfilium - L'Archive Musicale</title>
     
     <!-- Tailwind CSS pour le design -->
@@ -30,8 +30,8 @@
         .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(40px); }
@@ -47,10 +47,8 @@
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
         input:focus, textarea:focus { outline: none; }
         
-        /* Loading Shimmer effect */
         .shimmer {
             background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
             background-size: 200% 100%;
@@ -61,6 +59,7 @@
 </head>
 <body class="selection:bg-pink-500 selection:text-white relative">
 
+    <!-- Background Animé -->
     <div class="fixed inset-0 z-0 pointer-events-none opacity-40 overflow-hidden">
         <div class="absolute top-[0%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/30 blur-[120px] animate-float"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-pink-600/20 blur-[150px] animate-float" style="animation-delay: -3s;"></div>
@@ -68,10 +67,11 @@
     </div>
 
     <!-- Conteneur Popups (Toasts) -->
-    <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3"></div>
+    <div id="toast-container" class="fixed top-6 right-4 md:right-6 z-[100] flex flex-col gap-3"></div>
 
+    <!-- Écran d'authentification -->
     <div id="auth-screen" class="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div class="glass-panel p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl animate-fade-in border-t border-l border-white/20">
+        <div class="glass-panel p-8 md:p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl animate-fade-in border-t border-l border-white/20">
             <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(236,72,153,0.4)]">
                 <i class="ph ph-vinyl-record text-3xl text-white"></i>
             </div>
@@ -93,41 +93,64 @@
         </div>
     </div>
 
-    <div id="app-screen" class="relative z-10 hidden flex h-screen">
-        <!-- Sidebar -->
-        <nav class="w-20 md:w-64 glass-panel border-r border-white/10 flex flex-col items-center md:items-start py-8 transition-all duration-300">
-            <div class="flex items-center gap-3 px-0 md:px-8 mb-12 cursor-pointer" onclick="switchView('home')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0">
+    <!-- Application Principale -->
+    <div id="app-screen" class="relative z-10 hidden flex-col md:flex-row h-screen overflow-hidden">
+        
+        <!-- Sidebar Desktop -->
+        <nav class="hidden md:flex w-64 glass-panel border-r border-white/10 flex-col py-8 transition-all duration-300 h-full shrink-0 z-20">
+            <div class="flex items-center gap-3 px-8 mb-12 cursor-pointer" onclick="switchView('home')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg">
                     <i class="ph-fill ph-vinyl-record text-white text-xl"></i>
                 </div>
-                <span class="text-xl font-black hidden md:block bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">Lehfilium</span>
+                <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight">Lehfilium</span>
             </div>
 
             <div class="flex-1 w-full px-4 space-y-2">
                 <button onclick="switchView('home')" id="nav-home" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 bg-white/10 text-white">
-                    <i class="ph ph-house text-2xl"></i> <span class="font-medium hidden md:block">Accueil</span>
+                    <i class="ph ph-house text-2xl"></i> <span class="font-medium">Accueil</span>
                 </button>
                 <button onclick="switchView('search')" id="nav-search" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-magnifying-glass text-2xl"></i> <span class="font-medium hidden md:block">Recherche</span>
+                    <i class="ph ph-magnifying-glass text-2xl"></i> <span class="font-medium">Recherche</span>
+                </button>
+                <button onclick="switchView('community')" id="nav-community" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
+                    <i class="ph ph-users-three text-2xl"></i> <span class="font-medium">Communauté</span>
                 </button>
                 <button onclick="switchView('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 text-gray-500 hover:text-white hover:bg-white/5">
-                    <i class="ph ph-user text-2xl"></i> <span class="font-medium hidden md:block">Mon Profil</span>
+                    <i class="ph ph-user text-2xl"></i> <span class="font-medium">Mon Profil</span>
                 </button>
             </div>
 
             <div class="w-full px-4 mt-auto">
                 <button onclick="logOut()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                    <i class="ph ph-sign-out text-2xl"></i> <span class="font-medium hidden md:block">Déconnexion</span>
+                    <i class="ph ph-sign-out text-2xl"></i> <span class="font-medium">Déconnexion</span>
                 </button>
             </div>
         </nav>
 
-        <main class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-10" id="main-content">
-            <!-- Vues injectées en JavaScript ici -->
+        <!-- Navbar Mobile (Bottom) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-white/10 z-50 flex justify-around items-center p-2 backdrop-blur-2xl bg-[#0a0a0f]/95 pb-safe">
+            <button onclick="switchView('home')" id="nav-mobile-home" class="nav-btn-mobile flex flex-col items-center gap-1 text-pink-400 p-2 transition-colors">
+                <i class="ph-fill ph-house text-2xl"></i><span class="text-[10px] font-bold">Accueil</span>
+            </button>
+            <button onclick="switchView('search')" id="nav-mobile-search" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
+                <i class="ph-fill ph-magnifying-glass text-2xl"></i><span class="text-[10px] font-bold">Recherche</span>
+            </button>
+            <button onclick="switchView('community')" id="nav-mobile-community" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
+                <i class="ph-fill ph-users-three text-2xl"></i><span class="text-[10px] font-bold">Social</span>
+            </button>
+            <button onclick="switchView('profile')" id="nav-mobile-profile" class="nav-btn-mobile flex flex-col items-center gap-1 text-gray-500 hover:text-white p-2 transition-colors">
+                <i class="ph-fill ph-user text-2xl"></i><span class="text-[10px] font-bold">Profil</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-10 pb-28 md:pb-10 relative z-10 w-full" id="main-content">
+            <!-- Vues injectées ici -->
         </main>
     </div>
 
     <script>
+        // --- INITIALISATION SUPABASE ---
         const { createClient } = window.supabase;
         const SUPABASE_URL = 'https://ydzgypqykkwqqnqttaaj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlkemd5cHF5a2t3cXFucXR0YWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NjM3NzcsImV4cCI6MjA5NjUzOTc3N30.ax7ZOCH9TffTXBwaR2Jd4gPH8c2rq5Do__gxsjylXOA';
@@ -140,18 +163,16 @@
         let currentTracksData = [];
         let trackRatingsState = {};
         
-        // État de la recherche
         let currentSearchQuery = "";
-        let currentSearchFilter = "tous"; // "tous", "album", "ep", "single", "artist"
+        let currentSearchFilter = "tous"; 
 
-        // Système de Toast
+        // --- TOAST NOTIFICATIONS ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
             const isError = type === 'error';
-            toast.className = `glass-panel ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} px-6 py-4 rounded-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 shadow-2xl`;
-            toast.innerHTML = `<i class="ph-fill ${isError ? 'ph-warning-circle text-red-400' : 'ph-check-circle text-green-400'} text-2xl"></i><span class="font-medium text-white">${message}</span>`;
+            toast.className = `glass-panel ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} px-5 py-3 rounded-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 shadow-2xl backdrop-blur-3xl`;
+            toast.innerHTML = `<i class="ph-fill ${isError ? 'ph-warning-circle text-red-400' : 'ph-check-circle text-green-400'} text-xl"></i><span class="font-medium text-white text-sm">${message}</span>`;
             
             container.appendChild(toast);
             requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
@@ -161,7 +182,7 @@
             }, 3000);
         }
 
-        // --- AUTH & ROUTAGE ---
+        // --- AUTHENTIFICATION ---
         async function checkSession() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (user) {
@@ -169,13 +190,12 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
-                // Routing via URL (pour les profils partagés)
                 const urlParams = new URLSearchParams(window.location.search);
                 const sharedUserId = urlParams.get('user');
                 
                 if (sharedUserId) {
                     renderProfile(document.getElementById('main-content'), sharedUserId);
-                    window.history.replaceState({}, document.title, window.location.pathname); // Nettoie l'URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     switchView('home');
                 }
@@ -202,11 +222,13 @@
         async function logOut() {
             await supabaseClient.auth.signOut();
             currentUser = null;
-            showToast("Déconnecté avec succès.", "success");
+            showToast("Déconnecté.", "success");
             checkSession();
         }
 
+        // --- NAVIGATION ROUTER ---
         function switchView(viewName) {
+            // Update Desktop Nav
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-white/10', 'text-white');
                 btn.classList.add('text-gray-500');
@@ -217,102 +239,138 @@
                 activeBtn.classList.add('bg-white/10', 'text-white');
             }
 
+            // Update Mobile Nav
+            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                btn.classList.remove('text-pink-400');
+                btn.classList.add('text-gray-500');
+            });
+            const activeMobileBtn = document.getElementById(`nav-mobile-${viewName}`);
+            if(activeMobileBtn) {
+                activeMobileBtn.classList.remove('text-gray-500');
+                activeMobileBtn.classList.add('text-pink-400');
+            }
+
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = '';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('main-content').scrollTop = 0;
 
             if(viewName === 'home') renderHome(mainContent);
             if(viewName === 'search') renderSearch(mainContent);
+            if(viewName === 'community') renderCommunity(mainContent);
             if(viewName === 'album') renderAlbumView(mainContent);
             if(viewName === 'artist') renderArtistView(mainContent);
             if(viewName === 'profile') renderProfile(mainContent, currentUser.id);
         }
 
-        // --- API HELPERS (WIKIPEDIA & APPLE) ---
+        // --- API HELPERS ---
         async function fetchWikiData(query) {
             try {
-                // Tente de trouver la page exacte en français
                 let res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
                 if(res.ok) return await res.json();
-                
-                // Si non trouvé, tente avec "(groupe)" ou "(album)" ou "(musicien)"
                 res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query + " (groupe)")}`);
                 if(res.ok) return await res.json();
-                
                 res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query + " (album)")}`);
                 if(res.ok) return await res.json();
-                
                 return null;
             } catch(e) { return null; }
         }
 
-        // --- VUES ---
+        window.searchAndGoToArtist = async function(artistName) {
+            showToast("Recherche de l'artiste...", "success");
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=musicArtist&limit=1`);
+                const data = await res.json();
+                if(data.results.length > 0) {
+                    currentArtistData = data.results[0];
+                    switchView('artist');
+                } else {
+                    showToast("Artiste introuvable dans les archives.", "error");
+                }
+            } catch(e) { showToast("Erreur réseau.", "error"); }
+        }
+
+        window.loadExistingRatings = async function() {
+            trackRatingsState = {};
+            if(!currentUser || !currentAlbumData) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('album_ratings')
+                    .select('track_ratings')
+                    .eq('user_id', currentUser.id)
+                    .eq('album_id', currentAlbumData.collectionId.toString())
+                    .single();
+                
+                if (data && data.track_ratings) trackRatingsState = data.track_ratings;
+            } catch(e) { } // Pas grave s'il n'y a pas de notes existantes
+        }
+
+        // --- VUES PRINCIPALES ---
         function renderHome(container) {
             container.innerHTML = `
-                <div class="animate-fade-in space-y-12 pb-12">
+                <div class="animate-fade-in space-y-8 md:space-y-12 pb-4">
                     <!-- Hero Section -->
-                    <div class="relative w-full h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(236,72,153,0.15)] group">
+                    <div class="relative w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(236,72,153,0.15)] group border border-white/5">
                         <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-purple-900/80 to-pink-900/60 z-10"></div>
                         <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2074" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000">
-                        <div class="relative z-20 h-full flex flex-col justify-center p-8 md:p-16 max-w-4xl">
-                            <span class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase w-max mb-6 text-pink-300">Bienvenue sur Lehfilium</span>
-                            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight drop-shadow-xl">
+                        <div class="relative z-20 h-full flex flex-col justify-center p-6 md:p-16 max-w-4xl">
+                            <span class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] md:text-xs font-bold tracking-widest uppercase w-max mb-4 md:mb-6 text-pink-300">Bienvenue sur Lehfilium</span>
+                            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight drop-shadow-xl text-balance">
                                 Archivez votre vie <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400">musicale.</span>
                             </h1>
-                            <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl font-light">Lehfilium n'est pas qu'un outil de notation. C'est une encyclopédie vivante, sociale et complète qui vous permet de documenter, analyser et partager chaque vibration musicale.</p>
-                            <button onclick="switchView('search')" class="bg-white text-black px-8 py-4 rounded-xl font-black w-max hover:scale-105 transition-transform flex items-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                                <i class="ph-bold ph-magnifying-glass text-xl"></i> Commencer la recherche
+                            <p class="text-base md:text-xl text-gray-300 mb-6 md:mb-8 max-w-2xl font-light">Lehfilium n'est pas qu'un outil de notation. C'est une encyclopédie vivante et sociale.</p>
+                            <button onclick="switchView('search')" class="bg-white text-black px-6 md:px-8 py-3 md:py-4 rounded-xl font-black w-max hover:scale-105 transition-transform flex items-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                                <i class="ph-bold ph-magnifying-glass text-xl"></i> Découvrir
                             </button>
                         </div>
                     </div>
 
                     <!-- Features -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.2s">
-                        <div class="glass-panel p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
-                                <i class="ph-fill ph-database text-3xl text-purple-400"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-slide-up" style="animation-delay: 0.2s">
+                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 border border-purple-500/30">
+                                <i class="ph-fill ph-database text-2xl text-purple-400"></i>
                             </div>
-                            <h3 class="text-xl font-bold mb-3">Base de données infinie</h3>
-                            <p class="text-gray-400 leading-relaxed">Connecté à de multiples sources mondiales (Apple, Wikipédia). Découvrez l'histoire complète derrière chaque album, les membres, et l'origine des œuvres.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2">Base de données infinie</h3>
+                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Découvrez l'histoire complète derrière chaque album, grâce aux API mondiales d'Apple et Wikipédia.</p>
                         </div>
-                        <div class="glass-panel p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-14 h-14 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 border border-pink-500/30">
-                                <i class="ph-fill ph-sliders-horizontal text-3xl text-pink-400"></i>
+                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-4 border border-pink-500/30">
+                                <i class="ph-fill ph-sliders-horizontal text-2xl text-pink-400"></i>
                             </div>
-                            <h3 class="text-xl font-bold mb-3">Précision Chirurgicale</h3>
-                            <p class="text-gray-400 leading-relaxed">Notez chaque chanson individuellement au dixième près (0.1). L'algorithme Lehfilium calculera la note globale de l'album avec une rigueur mathématique.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2">Précision Chirurgicale</h3>
+                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Notez chaque chanson au dixième près (0.1). L'algorithme calculera la note globale avec rigueur.</p>
                         </div>
-                        <div class="glass-panel p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
-                            <div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/30">
-                                <i class="ph-fill ph-users-three text-3xl text-blue-400"></i>
+                        <div class="glass-panel p-6 md:p-8 rounded-3xl border-t border-l border-white/10 hover:-translate-y-2 transition-transform duration-300">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 border border-blue-500/30">
+                                <i class="ph-fill ph-users-three text-2xl text-blue-400"></i>
                             </div>
-                            <h3 class="text-xl font-bold mb-3">Social & Public</h3>
-                            <p class="text-gray-400 leading-relaxed">Générez votre profil public instantanément. Partagez votre journal, suivez l'avis de vos amis, et comparez vos goûts musicaux avec le monde entier.</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2">Social & Public</h3>
+                            <p class="text-sm md:text-base text-gray-400 leading-relaxed">Partagez votre journal, suivez l'avis de vos amis, et comparez vos goûts musicaux avec le monde.</p>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        // --- RECHERCHE ---
         function renderSearch(container) {
             container.innerHTML = `
                 <div class="animate-fade-in">
                     <form id="search-form" class="relative mb-6 max-w-4xl mx-auto">
-                        <i class="ph ph-magnifying-glass absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
-                        <input id="search-input" type="text" value="${currentSearchQuery}" placeholder="Toxicity, Daft Punk, Kendrick..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-32 text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
-                        <button type="submit" class="absolute right-3 top-3 bottom-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-8 font-bold transition-transform hover:scale-105">Rechercher</button>
+                        <i class="ph ph-magnifying-glass absolute left-4 md:left-6 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                        <input id="search-input" type="text" value="${currentSearchQuery}" placeholder="Toxicity, Daft Punk..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 md:py-5 pl-12 md:pl-16 pr-24 md:pr-32 text-base md:text-lg text-white focus:border-pink-500 backdrop-blur-md transition-all shadow-xl">
+                        <button type="submit" class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl px-4 md:px-8 font-bold transition-transform hover:scale-105 text-sm md:text-base">Chercher</button>
                     </form>
 
-                    <!-- Filtres stricts Lehfilium (Sans mention du nb de pistes) -->
-                    <div class="flex flex-wrap justify-center gap-3 mb-10">
-                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'tous' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('tous')">Tous</button>
-                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">Album</button>
-                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'ep' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('ep')">EP</button>
-                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'single' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('single')">Single</button>
-                        <button class="filter-btn px-6 py-2 rounded-full font-medium transition-all ${currentSearchFilter === 'artist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('artist')">Artiste</button>
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-10">
+                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'tous' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('tous')">Tous</button>
+                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'album' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('album')">Album</button>
+                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'ep' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('ep')">EP</button>
+                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'single' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('single')">Single</button>
+                        <button class="filter-btn px-4 md:px-6 py-1.5 md:py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentSearchFilter === 'artist' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}" onclick="setFilter('artist')">Artiste</button>
                     </div>
 
-                    <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6 pb-12"></div>
+                    <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
                 </div>
             `;
 
@@ -333,38 +391,32 @@
         async function executeSearch(query) {
             if(!query) return;
             const resultsContainer = document.getElementById('search-results');
-            resultsContainer.innerHTML = `<div class="col-span-full text-center py-20"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="text-gray-400 mt-4 font-medium tracking-wide">Interrogation des bases de données mondiales...</p></div>`;
+            resultsContainer.innerHTML = `<div class="col-span-full text-center py-20"><i class="ph ph-spinner-gap animate-spin text-5xl text-pink-500"></i><p class="text-gray-400 mt-4 font-medium tracking-wide">Fouille des archives mondiales...</p></div>`;
 
             try {
                 let results = [];
-                
+                // Pour maximiser les chances de trouver Toxicity ou des albums noyés, on monte la limite à 200
                 if (currentSearchFilter === 'tous') {
-                    // Fetch Albums ET Artistes en parallèle
                     const [resAlbums, resArtists] = await Promise.all([
-                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=100`),
+                        fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200`),
                         fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=20`)
                     ]);
-                    const dataAlbums = await resAlbums.json();
-                    const dataArtists = await resArtists.json();
-                    results = [...dataArtists.results, ...dataAlbums.results];
+                    results = [...(await resArtists.json()).results, ...(await resAlbums.json()).results];
                 } else if (currentSearchFilter === 'artist') {
                     const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=50`);
-                    const data = await res.json();
-                    results = data.results;
+                    results = (await res.json()).results;
                 } else {
                     const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=200`);
-                    const data = await res.json();
-                    results = data.results;
+                    results = (await res.json()).results;
                 }
                 
                 resultsContainer.innerHTML = '';
                 
                 if(results.length === 0) {
-                    resultsContainer.innerHTML = `<div class="col-span-full text-center py-20 bg-white/5 rounded-3xl border border-white/10"><i class="ph-fill ph-ghost text-6xl text-gray-600 mb-4"></i><p class="text-gray-400">Aucune archive trouvée pour "${query}".</p></div>`;
+                    resultsContainer.innerHTML = `<div class="col-span-full text-center py-10 bg-white/5 rounded-3xl border border-white/10"><i class="ph-fill ph-ghost text-6xl text-gray-600 mb-4"></i><p class="text-gray-400">Aucune archive trouvée pour "${query}".</p></div>`;
                     return;
                 }
 
-                // Filtrage et Tri Intelligent Lehfilium
                 let filtered = results.filter(item => {
                     if (item.wrapperType === 'artist') return currentSearchFilter === 'tous' || currentSearchFilter === 'artist';
                     
@@ -380,12 +432,12 @@
                 filtered.sort((a, b) => {
                     const nameA = a.wrapperType === 'artist' ? a.artistName : a.collectionName;
                     const nameB = b.wrapperType === 'artist' ? b.artistName : b.collectionName;
+                    
+                    // Priorité absolue si le nom recherché est EXACTEMENT le nom de l'album (ex: Toxicity)
                     const aExact = nameA.toLowerCase() === query.toLowerCase() ? 1 : 0;
                     const bExact = nameB.toLowerCase() === query.toLowerCase() ? 1 : 0;
-                    
                     if (aExact !== bExact) return bExact - aExact;
                     
-                    // Artistes d'abord si exact, sinon albums triés par popularité (nb de tracks)
                     if (a.wrapperType === 'artist' && b.wrapperType !== 'artist') return -1;
                     if (a.wrapperType !== 'artist' && b.wrapperType === 'artist') return 1;
                     if (a.wrapperType !== 'artist' && b.wrapperType !== 'artist') return b.trackCount - a.trackCount;
@@ -397,7 +449,7 @@
                     else renderSearchAlbumCard(item, resultsContainer);
                 });
                 
-                if(filtered.length === 0) resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat exact dans cette catégorie.</p>`;
+                if(filtered.length === 0) resultsContainer.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">Aucun résultat dans cette catégorie.</p>`;
                 
             } catch(e) {
                 resultsContainer.innerHTML = `<p class="text-red-400 col-span-full text-center">Erreur de connexion aux archives.</p>`;
@@ -419,14 +471,14 @@
                     <span class="absolute top-2 left-2 ${badgeColor} text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 uppercase tracking-wider">${badgeText}</span>
                     <img src="${highResImage}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-                            <i class="ph-fill ph-plus text-black text-2xl"></i>
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+                            <i class="ph-fill ph-plus text-black text-xl"></i>
                         </div>
                     </div>
                 </div>
-                <h3 class="font-bold text-base leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${album.collectionName}</h3>
-                <p class="text-gray-400 text-sm truncate group-hover:text-white transition-colors">${album.artistName}</p>
-                <p class="text-xs text-gray-600 font-medium mt-auto pt-1">${album.primaryGenreName} • ${new Date(album.releaseDate).getFullYear()}</p>
+                <h3 class="font-bold text-sm md:text-base leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${album.collectionName}</h3>
+                <p class="text-gray-400 text-xs md:text-sm truncate group-hover:text-white transition-colors">${album.artistName}</p>
+                <p class="text-[10px] md:text-xs text-gray-600 font-medium mt-auto pt-1">${album.primaryGenreName} • ${new Date(album.releaseDate).getFullYear()}</p>
             `;
             
             card.onclick = () => {
@@ -443,15 +495,14 @@
             card.className = "group cursor-pointer animate-slide-up text-center flex flex-col items-center";
             
             card.innerHTML = `
-                <div class="relative w-full aspect-square rounded-full mb-4 group-hover:-translate-y-2 transition-transform duration-500">
+                <div class="relative w-full aspect-square rounded-full mb-3 group-hover:-translate-y-2 transition-transform duration-500 max-w-[150px] md:max-w-full">
                     <div id="${cardId}" class="w-full h-full rounded-full overflow-hidden border-4 border-white/5 shadow-xl bg-gradient-to-br from-gray-800 to-[#0a0a0f] flex items-center justify-center z-10 relative">
-                        <i class="ph-fill ph-user text-5xl text-gray-600"></i>
+                        <i class="ph-fill ph-user text-4xl md:text-5xl text-gray-600"></i>
                     </div>
                     <div class="absolute inset-0 bg-pink-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-0"></div>
                 </div>
-                <span class="px-2 py-0.5 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 text-gray-300 border border-white/5">Artiste</span>
-                <h3 class="font-bold text-lg leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${artist.artistName}</h3>
-                <p class="text-xs text-gray-500">${artist.primaryGenreName || 'Musique'}</p>
+                <span class="px-2 py-0.5 bg-white/10 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-1 text-gray-300 border border-white/5">Artiste</span>
+                <h3 class="font-bold text-sm md:text-lg leading-tight mb-1 group-hover:text-pink-400 line-clamp-2 transition-colors">${artist.artistName}</h3>
             `;
             card.onclick = () => {
                 currentArtistData = artist;
@@ -459,7 +510,6 @@
             };
             container.appendChild(card);
 
-            // Fetch asynchrone de l'image de l'artiste pour la recherche (Algorithme Lehfilium)
             fetch(`https://itunes.apple.com/lookup?id=${artist.artistId}&entity=album&limit=1`)
                 .then(res => res.json())
                 .then(data => {
@@ -470,7 +520,81 @@
                 }).catch(() => {});
         }
 
-        // --- VUE ALBUM (MAXIMUM INFO) ---
+        // --- VUE COMMUNAUTÉ (Social & Utilisateurs) ---
+        function renderCommunity(container) {
+            container.innerHTML = `
+                <div class="animate-fade-in">
+                    <h1 class="text-3xl md:text-4xl font-black mb-6 md:mb-8 flex items-center gap-3"><i class="ph-fill ph-users-three text-pink-500"></i> Communauté Lehfilium</h1>
+                    
+                    <div class="glass-panel p-5 md:p-6 rounded-3xl mb-8 border border-white/10">
+                        <h2 class="text-base md:text-lg font-bold mb-3">Rechercher un membre</h2>
+                        <p class="text-xs md:text-sm text-gray-400 mb-4">Entrez l'ID du membre pour consulter son journal musical public et vous y abonner.</p>
+                        <div class="flex gap-3">
+                            <input id="user-search-input" type="text" placeholder="Ex: a1b2c3d4..." class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm md:text-base text-white focus:border-pink-500 transition-all">
+                            <button onclick="searchUser()" class="bg-pink-600 hover:bg-pink-500 text-white px-5 md:px-6 py-3 rounded-xl font-bold transition-all"><i class="ph-bold ph-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i class="ph-fill ph-activity text-purple-400"></i> Activité Récente Globale</h2>
+                    <div id="community-feed" class="space-y-4 md:space-y-5">
+                        <div class="text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+                    </div>
+                </div>
+            `;
+            fetchCommunityFeed();
+        }
+
+        window.searchUser = function() {
+            const query = document.getElementById('user-search-input').value.trim();
+            if(query.length < 5) return showToast("Entrez au moins les 5 premiers caractères de l'ID du membre.", "error");
+            showToast("Redirection vers le profil...", "success");
+            // Dans une vraie app, on ferait une recherche exacte. Ici on redirige pour simuler.
+            renderProfile(document.getElementById('main-content'), query); // Mock redirect
+        }
+
+        async function fetchCommunityFeed() {
+            const { data, error } = await supabaseClient.from('album_ratings').select('*').order('created_at', { ascending: false }).limit(30);
+            const container = document.getElementById('community-feed');
+            
+            if(error || !data) return container.innerHTML = `<p class="text-red-400 glass-panel p-4 rounded-xl">Impossible de charger le fil d'actualité.</p>`;
+            if(data.length === 0) return container.innerHTML = `<p class="text-gray-400 glass-panel p-4 rounded-xl">Le réseau Lehfilium est silencieux.</p>`;
+
+            container.innerHTML = data.map(rating => `
+                <div class="glass-panel p-4 md:p-5 rounded-2xl flex gap-4 md:gap-5 items-center hover:bg-white/5 transition-colors border border-white/5">
+                    <img src="${rating.cover_url}" class="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0" onclick="fetchAlbumAndGo('${rating.album_id}')">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs md:text-sm text-gray-400 font-bold cursor-pointer hover:text-pink-400 truncate pr-2" onclick="switchView('profile'); renderProfile(document.getElementById('main-content'), '${rating.user_id}')">
+                                <i class="ph-fill ph-user text-gray-500"></i> Membre #${rating.user_id.split('-')[0]}
+                            </p>
+                            <span class="text-[10px] md:text-xs text-gray-600 shrink-0">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        <h3 class="font-bold text-sm md:text-base text-white leading-tight mb-1 cursor-pointer hover:text-pink-300 truncate" onclick="fetchAlbumAndGo('${rating.album_id}')">A noté ${rating.album_title}</h3>
+                        <div class="flex items-center gap-3">
+                            <p class="text-xs text-gray-500 truncate">${rating.artist_name}</p>
+                            <div class="inline-flex items-center gap-1 bg-black/40 px-2 py-0.5 md:py-1 rounded-md border border-white/10">
+                                <i class="ph-fill ph-star text-yellow-500 text-xs"></i>
+                                <span class="font-bold text-xs md:text-sm text-white">${rating.global_rating}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.fetchAlbumAndGo = async function(albumId) {
+            showToast("Ouverture de l'archive...", "success");
+            try {
+                const res = await fetch(`https://itunes.apple.com/lookup?id=${albumId}&entity=album`);
+                const data = await res.json();
+                if(data.results.length > 0) {
+                    currentAlbumData = data.results[0];
+                    switchView('album');
+                }
+            } catch(e) {}
+        }
+
+        // --- VUE ALBUM ---
         async function renderAlbumView(container) {
             if(!currentAlbumData) return switchView('search');
             
@@ -482,123 +606,108 @@
             if (currentAlbumData.trackCount <= 3) badgeText = "Single";
             else if (currentAlbumData.trackCount <= 6) badgeText = "EP";
 
+            // Mock AOTY Critic Score (seeded by album ID for consistency)
+            const aotyScore = 50 + (currentAlbumData.collectionId % 46); // 50 to 95
+
+            // Real Lehfilium Community Score
+            const { data: commData } = await supabaseClient.from('album_ratings').select('global_rating').eq('album_id', currentAlbumData.collectionId.toString());
+            let commAvg = "-";
+            if(commData && commData.length > 0) {
+                const scores = commData.map(d => parseFloat(d.global_rating)).filter(s => !isNaN(s));
+                if(scores.length > 0) commAvg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+            }
+
             container.innerHTML = `
-                <div class="animate-fade-in pb-20">
-                    <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max">
+                <div class="animate-fade-in">
+                    <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max text-sm">
                         <i class="ph ph-arrow-left"></i> Retour
                     </button>
 
                     <!-- HEADER ALBUM -->
-                    <div class="relative rounded-[2.5rem] overflow-hidden mb-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                    <div class="relative rounded-[2rem] overflow-hidden mb-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                         <div class="absolute inset-0 z-0">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-[80px] opacity-30 scale-125">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent"></div>
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-full h-full object-cover blur-[60px] opacity-30 scale-125">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent"></div>
                         </div>
                         
-                        <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-end">
-                            <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-80 md:h-80 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/20 z-20 object-cover">
+                        <div class="relative z-10 p-6 md:p-10 flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-end text-center md:text-left">
+                            <img src="${currentAlbumData.artworkUrl100}" class="w-48 h-48 md:w-72 md:h-72 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/20 z-20 object-cover shrink-0">
                             
                             <div class="flex-1 w-full z-20">
-                                <div class="flex flex-wrap items-center gap-3 mb-4">
-                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest text-white border border-white/10">${badgeText}</span>
-                                    <span class="bg-pink-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest text-pink-300 border border-pink-500/30">${currentAlbumData.primaryGenreName}</span>
+                                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest text-white border border-white/10">${badgeText}</span>
+                                    <span class="bg-pink-500/20 px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest text-pink-300 border border-pink-500/30">${currentAlbumData.primaryGenreName}</span>
                                 </div>
                                 
-                                <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight drop-shadow-xl text-balance">${currentAlbumData.collectionName}</h1>
+                                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black mb-2 leading-tight drop-shadow-xl">${currentAlbumData.collectionName}</h1>
                                 
-                                <p class="text-xl md:text-3xl text-gray-300 font-bold mb-8 flex items-center gap-3 cursor-pointer hover:text-white transition-colors w-max group" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
-                                    <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-all"><i class="ph-fill ph-user"></i></span>
+                                <p class="text-lg md:text-2xl text-gray-300 font-bold mb-6 flex items-center justify-center md:justify-start gap-2 cursor-pointer hover:text-white transition-colors w-max mx-auto md:mx-0 group" onclick="searchAndGoToArtist('${currentAlbumData.artistName}')">
+                                    <span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-black transition-all"><i class="ph-fill ph-user text-sm"></i></span>
                                     ${currentAlbumData.artistName}
                                 </p>
                                 
-                                <div class="glass-panel rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 border-white/5">
-                                    <div class="flex flex-col items-center lg:items-start text-center lg:text-left">
-                                        <p class="text-xs text-gray-500 mb-1 uppercase font-bold tracking-widest">Évaluation Lehfilium</p>
-                                        <div class="flex items-baseline gap-1">
-                                            <div id="global-score-display" class="text-6xl md:text-7xl font-black text-white transition-colors duration-500">0.0</div>
-                                            <span class="text-2xl text-gray-600 font-bold">/10</span>
+                                <div class="glass-panel rounded-2xl p-4 md:p-6 flex flex-col lg:flex-row items-center justify-between gap-6 border-white/5">
+                                    <!-- SCORES -->
+                                    <div class="flex items-center gap-6 divide-x divide-white/10">
+                                        <div class="flex flex-col items-center">
+                                            <p class="text-[10px] text-gray-500 mb-1 uppercase font-bold tracking-widest">Ma Note</p>
+                                            <div class="flex items-baseline gap-1">
+                                                <div id="global-score-display" class="text-4xl md:text-5xl font-black text-white">0.0</div><span class="text-lg text-gray-600 font-bold">/10</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col items-center pl-6">
+                                            <p class="text-[10px] text-pink-400 mb-1 uppercase font-bold tracking-widest">Communauté</p>
+                                            <div class="text-2xl md:text-3xl font-black text-white">${commAvg}</div>
+                                        </div>
+                                        <div class="flex flex-col items-center pl-6">
+                                            <p class="text-[10px] text-purple-400 mb-1 uppercase font-bold tracking-widest" title="Simulé pour la démo">Critique AOTY</p>
+                                            <div class="text-2xl md:text-3xl font-black text-white">${aotyScore}<span class="text-sm text-gray-600">/100</span></div>
                                         </div>
                                     </div>
                                     
-                                    <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                                        <button onclick="saveRatingsToDB()" class="w-full lg:w-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-black transition-transform hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(236,72,153,0.3)]">
-                                            <i class="ph-bold ph-floppy-disk text-xl"></i> Graver l'archive
+                                    <div class="flex flex-wrap justify-center gap-2 md:gap-3 w-full lg:w-auto">
+                                        <button onclick="saveRatingsToDB()" class="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white px-6 py-3 md:py-4 rounded-xl font-black transition-transform hover:scale-105 flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(236,72,153,0.3)] text-sm md:text-base">
+                                            <i class="ph-bold ph-floppy-disk text-lg"></i> Graver l'archive
                                         </button>
-                                        <a href="${currentAlbumData.collectionViewUrl}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] p-4 rounded-2xl transition-colors border border-white/10 flex items-center justify-center" title="Apple Music">
-                                            <i class="ph-fill ph-apple-logo text-2xl"></i>
+                                        <a href="${currentAlbumData.collectionViewUrl}" target="_blank" class="flex-1 sm:flex-none bg-black/50 hover:bg-black text-[#fa243c] p-3 md:p-4 rounded-xl transition-colors border border-white/10 flex items-center justify-center">
+                                            <i class="ph-fill ph-apple-logo text-xl md:text-2xl"></i>
                                         </a>
-                                        <a href="${spotifyAlbumLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] p-4 rounded-2xl transition-colors border border-white/10 flex items-center justify-center" title="Spotify">
-                                            <i class="ph-fill ph-spotify-logo text-2xl"></i>
+                                        <a href="${spotifyAlbumLink}" target="_blank" class="flex-1 sm:flex-none bg-black/50 hover:bg-black text-[#1DB954] p-3 md:p-4 rounded-xl transition-colors border border-white/10 flex items-center justify-center">
+                                            <i class="ph-fill ph-spotify-logo text-xl md:text-2xl"></i>
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- MAXIMUM INFO: COMPENDIUM WIKIPEDIA -->
-                    <div class="glass-panel rounded-[2rem] p-8 mb-12 border-l-4 border-l-purple-500 relative overflow-hidden group">
-                        <i class="ph-fill ph-books absolute -right-4 -bottom-4 text-[150px] text-white/[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none"></i>
-                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="ph-fill ph-info text-purple-400"></i> Compendium Lehfilium</h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 border-b border-white/10 pb-8">
-                            <div>
-                                <h3 class="text-sm text-gray-500 uppercase font-bold tracking-widest mb-2">Détails de l'Œuvre</h3>
-                                <ul class="space-y-3 text-gray-300">
-                                    <li class="flex items-center gap-2"><i class="ph-fill ph-calendar text-gray-500"></i> <strong class="text-white">Sortie :</strong> ${fullDate}</li>
-                                    <li class="flex items-center gap-2"><i class="ph-fill ph-music-notes text-gray-500"></i> <strong class="text-white">Pistes :</strong> ${currentAlbumData.trackCount}</li>
-                                    <li class="flex items-center gap-2"><i class="ph-fill ph-vinyl-record text-gray-500"></i> <strong class="text-white">Genre :</strong> ${currentAlbumData.primaryGenreName}</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 class="text-sm text-gray-500 uppercase font-bold tracking-widest mb-2">Production / Labels</h3>
-                                <p class="text-gray-300 text-sm leading-relaxed">${currentAlbumData.copyright || "Informations de copyright non renseignées."}</p>
-                            </div>
-                        </div>
-
-                        <!-- Info Wikipédia dynamique -->
-                        <div id="wiki-album-info" class="text-gray-300 leading-relaxed space-y-4">
-                            <div class="flex items-center gap-3 text-pink-400 animate-pulse"><i class="ph-bold ph-magnifying-glass"></i> Extraction des données historiques...</div>
                         </div>
                     </div>
 
                     <!-- PISTES -->
-                    <div id="tracklist-container" class="space-y-3"></div>
+                    <div id="tracklist-container" class="space-y-3 pb-8">
+                        <div class="text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
+                    </div>
                 </div>
             `;
-
-            // Appel Asynchrone Wikipédia pour l'album
-            fetchWikiData(currentAlbumData.collectionName).then(wiki => {
-                const wikiContainer = document.getElementById('wiki-album-info');
-                if(wiki && wiki.extract) {
-                    wikiContainer.innerHTML = `
-                        <h3 class="text-sm text-purple-400 uppercase font-bold tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-globe"></i> Source : Wikipédia</h3>
-                        <p class="text-lg font-light leading-relaxed">${wiki.extract}</p>
-                    `;
-                } else {
-                    wikiContainer.innerHTML = `<p class="text-gray-500 italic text-sm">Le compendium historique n'a pas trouvé de page dédiée exacte pour cet album. Il s'agit peut-être d'une œuvre de niche ou récente.</p>`;
-                }
-            });
 
             try {
                 const res = await fetch(`https://itunes.apple.com/lookup?id=${currentAlbumData.collectionId}&entity=song`);
                 const data = await res.json();
                 currentTracksData = data.results.filter(item => item.wrapperType === 'track');
-                await loadExistingRatings();
+                
+                await loadExistingRatings(); // La fonction corrigée
                 renderTracks();
             } catch (e) {
                 document.getElementById('tracklist-container').innerHTML = `<p class="text-red-500 text-center glass-panel p-4 rounded-xl border-red-500/30">Erreur lors du chargement des pistes.</p>`;
             }
         }
 
-        // --- VUE ARTISTE (MAXIMUM INFO) ---
+        // --- VUE ARTISTE ---
         async function renderArtistView(container) {
             if(!currentArtistData) return switchView('search');
             const spotifySearchLink = `https://open.spotify.com/search/${encodeURIComponent(currentArtistData.artistName)}`;
 
             container.innerHTML = `
-                <div class="animate-fade-in pb-20">
-                    <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max">
+                <div class="animate-fade-in">
+                    <button onclick="switchView('search')" class="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 w-max text-sm">
                         <i class="ph ph-arrow-left"></i> Retour
                     </button>
 
@@ -608,52 +717,34 @@
                         </div>
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-0"></div>
                         
-                        <div class="relative z-10 p-8 md:p-16 flex flex-col md:flex-row items-center md:items-end gap-8 text-center md:text-left">
-                            <div id="artist-pfp" class="w-40 h-40 md:w-56 md:h-56 rounded-full bg-white/5 border-4 border-white/10 overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] shrink-0 z-20">
-                                 <i class="ph-fill ph-microphone-stage text-6xl text-gray-600"></i>
+                        <div class="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 text-center md:text-left">
+                            <div id="artist-pfp" class="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border-4 border-white/10 overflow-hidden flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.1)] shrink-0 z-20">
+                                 <i class="ph-fill ph-microphone-stage text-5xl text-gray-600"></i>
                             </div>
                             
-                            <div class="flex-1 z-20">
-                                <span class="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-lg text-xs font-black uppercase tracking-widest text-white border border-white/10 mb-4 inline-block"><i class="ph-fill ph-star"></i> Entité Musicale</span>
-                                <h1 class="text-5xl md:text-7xl lg:text-8xl font-black mb-2 drop-shadow-2xl tracking-tighter">${currentArtistData.artistName}</h1>
-                                <p class="text-xl md:text-2xl text-pink-400 font-bold tracking-widest uppercase mb-8 drop-shadow-md">${currentArtistData.primaryGenreName || 'Musique'}</p>
+                            <div class="flex-1 z-20 w-full">
+                                <span class="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[10px] font-black uppercase tracking-widest text-white border border-white/10 mb-3 inline-block"><i class="ph-fill ph-star"></i> Entité Musicale</span>
+                                <h1 class="text-4xl md:text-7xl font-black mb-1 drop-shadow-2xl tracking-tighter">${currentArtistData.artistName}</h1>
+                                <p class="text-lg md:text-xl text-pink-400 font-bold tracking-widest uppercase mb-6 drop-shadow-md">${currentArtistData.primaryGenreName || 'Musique'}</p>
                                 
-                                <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                                    <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] border border-white/10 px-8 py-4 rounded-2xl font-black transition-all flex items-center gap-2">
-                                        <i class="ph-fill ph-apple-logo text-2xl"></i> Apple Music
+                                <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                                    <a href="${currentArtistData.artistLinkUrl}" target="_blank" class="bg-black/50 hover:bg-black text-[#fa243c] border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base">
+                                        <i class="ph-fill ph-apple-logo text-xl"></i> Apple Music
                                     </a>
-                                    <a href="${spotifySearchLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] border border-white/10 px-8 py-4 rounded-2xl font-black transition-all flex items-center gap-2">
-                                        <i class="ph-fill ph-spotify-logo text-2xl"></i> Spotify
+                                    <a href="${spotifySearchLink}" target="_blank" class="bg-black/50 hover:bg-black text-[#1DB954] border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base">
+                                        <i class="ph-fill ph-spotify-logo text-xl"></i> Spotify
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- WIKIPEDIA ARTIST INFO -->
-                    <div id="wiki-artist-info" class="glass-panel rounded-[2rem] p-8 md:p-12 mb-12 border border-white/10 relative overflow-hidden min-h-[200px] flex items-center justify-center">
-                        <div class="flex items-center gap-3 text-pink-400 animate-pulse text-lg font-medium"><i class="ph-bold ph-books"></i> Consultation des archives encyclopédiques...</div>
+                    <h2 class="text-2xl md:text-3xl font-black mb-6 flex items-center gap-3"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
+                    <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 pb-8">
+                        <div class="col-span-full text-center py-10"><i class="ph ph-spinner-gap animate-spin text-4xl text-pink-500"></i></div>
                     </div>
-
-                    <h2 class="text-3xl font-black mb-8 flex items-center gap-3"><i class="ph-fill ph-disc text-purple-500"></i> Discographie</h2>
-                    <div id="artist-albums-container" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-6"></div>
                 </div>
             `;
-
-            // Appel Asynchrone Wikipédia pour l'Artiste
-            fetchWikiData(currentArtistData.artistName).then(wiki => {
-                const wikiContainer = document.getElementById('wiki-artist-info');
-                if(wiki && wiki.extract) {
-                    wikiContainer.classList.remove('flex', 'items-center', 'justify-center');
-                    wikiContainer.innerHTML = `
-                        <i class="ph-fill ph-scroll absolute -right-10 -top-10 text-[200px] text-white/[0.03] pointer-events-none"></i>
-                        <h3 class="text-sm text-purple-400 uppercase font-bold tracking-widest mb-4 flex items-center gap-2"><i class="ph-fill ph-globe"></i> Biographie & Histoire (Wikipédia)</h3>
-                        <p class="text-lg md:text-xl font-light leading-relaxed text-gray-200">${wiki.extract}</p>
-                    `;
-                } else {
-                    wikiContainer.innerHTML = `<p class="text-gray-500 italic">Biographie non disponible dans les archives francophones principales.</p>`;
-                }
-            });
 
             try {
                 const res = await fetch(`https://itunes.apple.com/lookup?id=${currentArtistData.artistId}&entity=album&limit=200`);
@@ -669,17 +760,17 @@
                     albums.forEach(album => renderSearchAlbumCard(album, albumsContainer));
                     const topAlbumImage = albums[0].artworkUrl100.replace('100x100bb', '600x600bb');
                     document.getElementById('artist-pfp').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover">`;
-                    document.getElementById('artist-banner-bg').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover blur-[100px] opacity-40 scale-125">`;
+                    document.getElementById('artist-banner-bg').innerHTML = `<img src="${topAlbumImage}" class="w-full h-full object-cover blur-[80px] opacity-40 scale-125">`;
                 }
             } catch (e) {
                 document.getElementById('artist-albums-container').innerHTML = `<p class="text-red-500 col-span-full">Erreur réseau.</p>`;
             }
         }
 
-        // --- TRACKS & RATINGS LOGIC ---
+        // --- TRACKS LOGIC ---
         function renderTracks() {
             const container = document.getElementById('tracklist-container');
-            container.innerHTML = '<h2 class="text-2xl font-black mb-6 mt-8 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes & Analyses</h2>';
+            container.innerHTML = '<h2 class="text-xl md:text-2xl font-black mb-4 mt-6 flex items-center gap-2"><i class="ph-fill ph-list-numbers text-purple-500"></i> Pistes & Analyses</h2>';
 
             currentTracksData.forEach(track => {
                 const minutes = Math.floor(track.trackTimeMillis / 60000);
@@ -689,38 +780,38 @@
                 const explicitBadge = track.trackExplicitness === 'explicit' ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-[10px] font-black text-red-400 border border-red-500/30" title="Explicite">E</span>' : '';
 
                 const trackDiv = document.createElement('div');
-                trackDiv.className = "glass-panel p-5 rounded-3xl flex flex-col xl:flex-row gap-6 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:bg-white/[0.02] transition-all group";
+                trackDiv.className = "glass-panel p-4 md:p-5 rounded-2xl md:rounded-3xl flex flex-col xl:flex-row gap-4 md:gap-6 border-l-4 border-l-transparent focus-within:border-l-pink-500 hover:bg-white/[0.02] transition-all group";
                 trackDiv.innerHTML = `
-                    <div class="flex items-center gap-4 xl:w-[35%]">
-                        <span class="text-gray-500 font-black text-xl w-8 text-right group-hover:text-pink-500 transition-colors">${track.trackNumber}.</span>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-lg leading-tight text-white group-hover:text-pink-300 transition-colors line-clamp-2">${track.trackName}</h3>
-                            <div class="flex items-center gap-3 mt-1.5">
-                                <p class="text-xs text-gray-500 flex items-center gap-1 font-bold bg-white/5 px-2 py-1 rounded-md"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
+                    <div class="flex items-center gap-3 md:gap-4 xl:w-[35%]">
+                        <span class="text-gray-500 font-black text-lg md:text-xl w-6 md:w-8 text-right group-hover:text-pink-500 transition-colors">${track.trackNumber}.</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-base md:text-lg leading-tight text-white group-hover:text-pink-300 transition-colors truncate">${track.trackName}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <p class="text-[10px] md:text-xs text-gray-500 flex items-center gap-1 font-bold bg-white/5 px-2 py-0.5 rounded-md"><i class="ph-bold ph-clock"></i> ${timeStr}</p>
                                 ${explicitBadge}
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex-1 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div class="flex-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full">
                         <div class="relative w-full flex-1">
-                            <i class="ph-fill ph-quotes absolute left-4 top-4 text-gray-600 text-xl"></i>
+                            <i class="ph-fill ph-quotes absolute left-3 top-3 md:top-4 text-gray-600 text-lg"></i>
                             <textarea 
                                 id="note-${track.trackId}"
-                                placeholder="Votre analyse détaillée de cette piste..."
-                                class="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm text-gray-200 focus:border-purple-500 focus:bg-black/80 resize-none h-14 transition-all hover:border-white/20"
+                                placeholder="Analyse détaillée..."
+                                class="w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-10 pr-3 text-[10px] md:text-sm text-gray-200 focus:border-purple-500 focus:bg-black/80 resize-none h-12 md:h-14 transition-all hover:border-white/20"
                                 onchange="updateTrackState(${track.trackId}, 'note', this.value)"
                             >${existingData.note}</textarea>
                         </div>
                         
-                        <div class="flex items-center gap-2 bg-black/60 px-4 py-2 rounded-2xl border border-white/10 focus-within:border-pink-500 focus-within:bg-black transition-colors shrink-0 shadow-inner">
-                            <i class="ph-fill ph-star text-yellow-500 text-lg"></i>
+                        <div class="flex items-center gap-2 bg-black/60 px-3 py-1 md:py-2 rounded-xl border border-white/10 focus-within:border-pink-500 focus-within:bg-black transition-colors shrink-0 shadow-inner w-full sm:w-auto justify-center">
+                            <i class="ph-fill ph-star text-yellow-500 text-base md:text-lg"></i>
                             <input 
                                 id="score-${track.trackId}"
                                 type="number" min="0" max="10" step="0.1" 
                                 value="${existingData.score}"
                                 oninput="updateTrackState(${track.trackId}, 'score', this.value)"
-                                class="w-16 bg-transparent text-center text-2xl md:text-3xl font-black text-white focus:outline-none placeholder-gray-700"
+                                class="w-12 md:w-16 bg-transparent text-center text-xl md:text-3xl font-black text-white focus:outline-none placeholder-gray-700"
                                 placeholder="-"
                             >
                         </div>
@@ -772,105 +863,79 @@
             if (existing && existing.length > 0) error = (await supabaseClient.from('album_ratings').update(payload).eq('id', existing[0].id)).error;
             else error = (await supabaseClient.from('album_ratings').insert([payload])).error;
 
-            if (error) showToast("Erreur BD. Vérifiez la politique RLS.", "error");
+            if (error) showToast("Erreur BD. Vérifiez RLS.", "error");
             else showToast("Archive Lehfilium sauvegardée avec succès !", "success");
         };
 
-        // --- VUE PROFIL (PERSONNEL ET PUBLIC) & PARTAGE ---
+        // --- VUE PROFIL ---
         async function renderProfile(container, targetUserId) {
             const isMyProfile = (targetUserId === currentUser.id);
-            container.innerHTML = `<div class="text-center py-32"><div class="w-64 h-8 shimmer rounded-xl mx-auto mb-4"></div><div class="w-48 h-4 shimmer rounded-xl mx-auto"></div></div>`;
+            container.innerHTML = `<div class="text-center py-32"><div class="w-64 h-8 shimmer rounded-xl mx-auto mb-4"></div></div>`;
 
-            // Récupération des données du profil cible
             const { data, error } = await supabaseClient.from('album_ratings').select('*').eq('user_id', targetUserId).order('created_at', { ascending: false });
-
-            if(error) return container.innerHTML = `<div class="text-center py-20 text-red-500 glass-panel">Erreur de chargement du profil.</div>`;
+            if(error) return container.innerHTML = `<div class="text-center py-20 text-red-500 glass-panel">Erreur profil.</div>`;
 
             const ratings = data || [];
             let albumsHTML = ratings.length === 0 ? 
-                `<div class="col-span-full text-center py-20 glass-panel rounded-[2rem] border-dashed border-2 border-white/10">
-                    <i class="ph-fill ph-folder-open text-6xl text-gray-600 mb-4"></i>
-                    <h3 class="text-2xl font-bold mb-2">Ce journal Lehfilium est vide</h3>
-                </div>` : '';
+                `<div class="col-span-full text-center py-20 glass-panel rounded-[2rem] border-dashed border-2 border-white/10"><i class="ph-fill ph-folder-open text-6xl text-gray-600 mb-4"></i><h3 class="text-xl md:text-2xl font-bold">Ce journal est vide</h3></div>` : '';
 
             ratings.forEach(rating => {
                 albumsHTML += `
-                    <div class="glass-panel p-4 rounded-3xl flex flex-col md:flex-row gap-5 group hover:bg-white/5 transition-all shadow-lg border border-white/5 hover:border-white/20">
-                        <img src="${rating.cover_url}" class="w-full md:w-36 aspect-square rounded-2xl object-cover shadow-xl group-hover:scale-[1.02] transition-transform">
-                        <div class="flex flex-col justify-center flex-1 py-2">
-                            <h3 class="font-bold text-xl leading-tight mb-1 text-white group-hover:text-pink-300 transition-colors">${rating.album_title}</h3>
-                            <p class="text-sm text-gray-400 font-medium mb-4">${rating.artist_name}</p>
-                            
+                    <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 md:gap-5 group hover:bg-white/5 transition-all shadow-lg border border-white/5">
+                        <img src="${rating.cover_url}" class="w-full md:w-32 aspect-square rounded-xl object-cover shadow-xl group-hover:scale-[1.02] transition-transform">
+                        <div class="flex flex-col justify-center flex-1 py-1">
+                            <h3 class="font-bold text-lg leading-tight mb-1 text-white truncate">${rating.album_title}</h3>
+                            <p class="text-xs text-gray-400 font-medium mb-3 truncate">${rating.artist_name}</p>
                             <div class="flex items-center justify-between mt-auto">
-                                <div class="inline-flex items-center gap-2 bg-black/60 px-4 py-2 rounded-xl border border-white/10">
-                                    <i class="ph-fill ph-star text-yellow-500"></i>
-                                    <span class="font-black text-xl text-white">${rating.global_rating}</span>
+                                <div class="inline-flex items-center gap-1 bg-black/60 px-3 py-1.5 rounded-lg border border-white/10">
+                                    <i class="ph-fill ph-star text-yellow-500 text-sm"></i>
+                                    <span class="font-black text-base text-white">${rating.global_rating}</span>
                                 </div>
-                                <span class="text-xs text-gray-600 font-bold uppercase tracking-wider">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
+                                <span class="text-[10px] text-gray-600 font-bold uppercase">${new Date(rating.created_at).toLocaleDateString('fr-FR')}</span>
                             </div>
                         </div>
                     </div>
                 `;
             });
 
-            // Boutons d'actions selon le type de profil
             const actionButtons = isMyProfile ? `
-                <button onclick="shareProfile('${currentUser.id}')" class="bg-white text-black px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform">
+                <button onclick="shareProfile('${currentUser.id}')" class="bg-white text-black px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-105 transition-transform text-xs md:text-sm w-full md:w-auto">
                     <i class="ph-bold ph-share-network"></i> Partager mon profil
                 </button>
             ` : `
-                <button onclick="simulateFollow()" id="follow-btn" class="bg-pink-600 hover:bg-pink-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                <button onclick="simulateFollow()" id="follow-btn" class="bg-pink-600 hover:bg-pink-500 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-xs md:text-sm w-full md:w-auto">
                     <i class="ph-bold ph-user-plus"></i> S'abonner
-                </button>
-                <button onclick="showToast('Demande d\\'ami envoyée !', 'success')" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-                    <i class="ph-bold ph-hands-clapping"></i> Ami
                 </button>
             `;
 
-            const userEmailDisplay = isMyProfile ? currentUser.email : "Utilisateur Public";
             const userNameDisplay = isMyProfile ? currentUser.email.split('@')[0] : "Membre Lehfilium";
 
             container.innerHTML = `
-                <div class="animate-fade-in max-w-6xl mx-auto pb-12">
-                    <!-- HEADER PROFIL -->
-                    <div class="glass-panel rounded-[3rem] p-8 md:p-14 mb-12 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden shadow-2xl border-white/10">
-                        <div class="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-pink-500/20 to-purple-600/10 blur-[80px] rounded-full pointer-events-none"></div>
-                        
-                        <div class="w-36 h-36 md:w-48 md:h-48 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1.5 flex items-center justify-center relative z-10 shadow-[0_0_50px_rgba(236,72,153,0.3)] shrink-0">
-                            <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-[6px] border-[#0a0a0f] overflow-hidden relative">
-                                <i class="ph-fill ph-user text-[80px] text-white/30"></i>
+                <div class="animate-fade-in pb-12">
+                    <div class="glass-panel rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 mb-8 md:mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-10 relative overflow-hidden shadow-2xl border-white/10">
+                        <div class="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 p-1 md:p-1.5 flex items-center justify-center z-10 shrink-0">
+                            <div class="w-full h-full bg-[#1a1a24] rounded-full flex items-center justify-center border-4 md:border-[6px] border-[#0a0a0f] overflow-hidden">
+                                <i class="ph-fill ph-user text-5xl md:text-[80px] text-white/30"></i>
                             </div>
                         </div>
                         
                         <div class="flex-1 text-center md:text-left z-10 w-full">
-                            <span class="px-4 py-1.5 bg-white/10 rounded-full text-xs font-black tracking-widest uppercase mb-4 inline-block text-pink-300 border border-white/5">${isMyProfile ? "Mon Espace" : "Profil Public"}</span>
-                            <h1 class="text-5xl font-black mb-2 tracking-tight">${userNameDisplay}</h1>
-                            <p class="text-gray-400 font-medium mb-8 flex items-center justify-center md:justify-start gap-2">
-                                <i class="ph-fill ph-identification-badge text-gray-500 text-xl"></i> ID: ${targetUserId.split('-')[0]}...
-                            </p>
+                            <h1 class="text-3xl md:text-5xl font-black mb-1 md:mb-2 truncate">${userNameDisplay}</h1>
+                            <p class="text-xs md:text-sm text-gray-400 font-medium mb-6 md:mb-8"><i class="ph-fill ph-identification-badge"></i> ID: ${targetUserId.split('-')[0]}...</p>
                             
-                            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                <div class="bg-black/50 border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-4">
-                                    <div class="text-left">
-                                        <span class="block text-2xl font-black text-pink-400 leading-none">${ratings.length}</span>
-                                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Archives</span>
-                                    </div>
+                            <div class="flex flex-col md:flex-row items-center gap-4 w-full">
+                                <div class="bg-black/50 border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-4 justify-center w-full md:w-auto">
+                                    <div class="text-center md:text-left"><span class="block text-xl md:text-2xl font-black text-pink-400">${ratings.length}</span><span class="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold">Archives</span></div>
                                     <div class="w-px h-8 bg-white/10"></div>
-                                    <div class="text-left">
-                                        <span id="followers-count" class="block text-2xl font-black text-purple-400 leading-none">${isMyProfile ? "0" : "12"}</span>
-                                        <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Abonnés</span>
-                                    </div>
+                                    <div class="text-center md:text-left"><span id="followers-count" class="block text-xl md:text-2xl font-black text-purple-400">${isMyProfile ? "0" : "12"}</span><span class="text-[9px] md:text-[10px] text-gray-500 uppercase font-bold">Abonnés</span></div>
                                 </div>
-                                ${actionButtons}
+                                <div class="w-full md:w-auto">${actionButtons}</div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
-                        <h2 class="text-3xl font-black flex items-center gap-3"><i class="ph-fill ph-books text-purple-500"></i> ${isMyProfile ? "Mon Journal" : "Son Journal"}</h2>
-                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <h2 class="text-2xl md:text-3xl font-black mb-6 flex items-center gap-3"><i class="ph-fill ph-books text-purple-500"></i> ${isMyProfile ? "Mon Journal" : "Son Journal"}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
                         ${albumsHTML}
                     </div>
                 </div>
@@ -879,9 +944,7 @@
 
         window.shareProfile = function(userId) {
             const url = window.location.origin + window.location.pathname + "?user=" + userId;
-            navigator.clipboard.writeText(url).then(() => {
-                showToast("Lien du profil copié ! Vous pouvez l'envoyer à vos amis.", "success");
-            });
+            navigator.clipboard.writeText(url).then(() => showToast("Lien du profil copié !", "success"));
         };
 
         window.simulateFollow = function() {
@@ -891,7 +954,7 @@
                 btn.innerHTML = `<i class="ph-bold ph-check"></i> Abonné`;
                 btn.classList.replace('bg-pink-600', 'bg-white/20');
                 count.innerText = parseInt(count.innerText) + 1;
-                showToast("Vous êtes maintenant abonné à ce profil !", "success");
+                showToast("Abonnement réussi !", "success");
             } else {
                 btn.innerHTML = `<i class="ph-bold ph-user-plus"></i> S'abonner`;
                 btn.classList.replace('bg-white/20', 'bg-pink-600');
